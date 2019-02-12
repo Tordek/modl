@@ -1,0 +1,25 @@
+program = statement* ;
+statement = stmt SEMICOLON ;
+stmt = use
+     | let
+     | symchain
+     ;
+
+use = USE IDENTIFIER ;
+let = LET ( IDENTIFIER | SYMBOLIC ) (COLON type_signature)? LEFT_ARROW symchain ;
+
+type_signature = typename (RIGHT_ARROW type_signature)* ;
+           
+symchain = expression (SYMBOLIC symchain)* ;
+
+expression = primary (primary)* ;
+
+primary = function
+        | STRING
+        | NUMBER
+        | IDENTIFIER
+        | BUILTIN
+        | OPEN_PARENTHESES symchain CLOSE_PARENTHESES
+        ;
+
+function = OPEN_BRACE (BANG | identifier) identifier* PIPE statement* CLOSE_BRACE ;

@@ -1,0 +1,7 @@
+let + <- { x y | {#add} x y; };
+let print! <- { ! s | {#print} s; };
+let > <- { x y | {#gt} x y; };
+let == <- { x y | {#eq} x y; };
+let read! <- { ! | {#read}; };
+let if <- { c t f | ({#if} c t f) 1; };
+let - <- { x y | {#sub} x y; };

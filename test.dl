@@ -1,0 +1,10 @@
+use std;
+
+let fibo <- { x |
+	if (x == 0)
+	{ t | 1; }
+	{ f | if (x == 1)
+		{ t | 1; }
+		{ f | fibo (x - 1) + fibo (x - 2); };
+	};
+};
