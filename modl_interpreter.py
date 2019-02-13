@@ -2,14 +2,15 @@ import modl_expr as expr
 import modl_parser
 import modl_scanner
 
-BUILTIN = {}
-BUILTIN['print'] = lambda x: print(x)
-BUILTIN['add'] = lambda x, y: x + y
-BUILTIN['sub'] = lambda x, y: x - y
-BUILTIN['read'] = lambda: input()
-BUILTIN['eq'] = lambda x, y: x == y
-BUILTIN['gt'] = lambda x, y: x > y
-BUILTIN['if'] = lambda c, t, f: t if c else f
+BUILTIN = {
+    'print': lambda x: print(x),
+    'add': lambda x, y: x + y,
+    'sub': lambda x, y: x - y,
+    'read': lambda: input(),
+    'eq': lambda x, y: x == y,
+    'gt': lambda x, y: x > y,
+    'if': lambda c, t, f: t if c else f,
+}
 
 
 class Environment():
