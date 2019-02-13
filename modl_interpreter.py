@@ -55,9 +55,9 @@ class Interpreter():
             else:
                 return self.do_call(*results, environment=environment)
         elif isinstance(statement, expr.Symchain):
-            left = self.interpret(statement.left, environment)
-            op = self.interpret(statement.op, environment)
-            right = self.interpret(statement.right, environment)
+            (left, environment) = self.interpret(statement.left, environment)
+            (op, environment) = self.interpret(statement.op, environment)
+            (right, environment) = self.interpret(statement.right, environment)
             return self.do_call(op, left, right, environment=environment)
         elif isinstance(statement, expr.Use):
             with open(statement.identifier.name + ".dl") as file:
