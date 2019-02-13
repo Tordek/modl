@@ -62,7 +62,7 @@ class Parser():
             e = self.try_primary()
             if e is None:
                 if self.match(TokenType.BANG):
-                    chain.append(expr.Identifier(self.previous().lexeme))
+                    e =  expr.Identifier(self.previous().lexeme)
                 else:
                     break
             chain.append(e)

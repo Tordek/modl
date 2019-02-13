@@ -66,7 +66,7 @@ class Function():
         self.body = body
 
     def __repr__(self):
-        return "Function " + id(self) + " of " + len(args) + " arguments"
+        return "Function {} of {} arguments".format(id(self), len(self.args))
     
 
 class Literal():
@@ -75,7 +75,10 @@ class Literal():
         self.type = type
 
     def __repr__(self):
-        return "[" + self.type + "] " + self.value
+        if self.type:
+            return "[" + repr(self.type) + "] " + str(self.value)
+        else:
+            return repr(self.value)
     
 
 class Builtin():

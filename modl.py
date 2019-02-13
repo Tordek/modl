@@ -31,7 +31,7 @@ def run_prompt():
     env = modl_interpreter.Environment()
     while True:
         try:
-            run(input("> "), env)
+            env = run(input("> "), env)
         except Exception as e:
             print(traceback.format_exc())
             
@@ -40,7 +40,9 @@ def run(command, env):
     scanner = modl_scanner.Scanner(command)
     parser = modl_parser.Parser(scanner.scan_tokens())
     interpreter = modl_interpreter.Interpreter()
-    print(interpreter.interpret(parser.statement(), env))
+    result, env = interpreter.interpret(parser.statement(), env)
+    print(result)
+    return env
     
 
 def error(line, message):

@@ -19,3 +19,15 @@ let flatfibo <- { x |
    };
    fib x 1 1;
 };
+
+/* Test for scope */
+
+let a <- "outer";
+
+let f! <- { ! |
+	let showA! <- { ! | print! ! a; };
+	showA! !;
+	let a <- "inner";
+	showA! !;
+};
+
