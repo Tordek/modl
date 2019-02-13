@@ -1,5 +1,6 @@
 use std;
 
+/* Standard recursive fibonacci definition */
 let fibo <- { x |
 	if (x == 0)
 	{ t | 1; }
@@ -7,4 +8,14 @@ let fibo <- { x |
 		{ t | 1; }
 		{ f | fibo (x - 1) + fibo (x - 2); };
 	};
+};
+
+/* Prettier, less deeply recursive fibonacci */
+let flatfibo <- { x |
+   let fib <- { x a b |
+      if (x == 0)
+      { t | a; }
+      { f | fib (x - 1) b (a + b); };
+   };
+   fib x 1 1;
 };

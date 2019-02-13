@@ -201,9 +201,8 @@ class Scanner():
                 break
             self.advance()
 
-        if self.is_at_end():
-            raise Exception(self.line, "Unterminated comment")
-            return
+            if self.is_at_end():
+                raise Exception(self.line, "Unterminated comment")
 
         # self.add_token(TokenType.COMMENT, self.current_lexeme())
         
@@ -215,6 +214,11 @@ class Scanner():
         if self.is_at_end():
             return None
         return self.source[self.current]
+
+    def peeknext(self):
+        if self.current + 1 >= len(self.source):
+            return None
+        return self.source[self.current+1]
 
     def current_lexeme(self):
         return self.source[self.start:self.current]
