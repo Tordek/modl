@@ -29,6 +29,7 @@ def run_file(path):
 
 def run_prompt():
     env = modl_interpreter.Environment()
+    env = env.set("!", "!")
     while True:
         try:
             env = run(input("> "), env)
@@ -40,7 +41,7 @@ def run(command, env):
     scanner = modl_scanner.Scanner(command)
     parser = modl_parser.Parser(scanner.scan_tokens())
     interpreter = modl_interpreter.Interpreter()
-    result, env = interpreter.interpret(parser.statement(), env)
+    (result, env) = interpreter.interpret(parser.statement(), env)
     print(result)
     return env
     

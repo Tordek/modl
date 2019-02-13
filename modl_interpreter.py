@@ -1,3 +1,4 @@
+import collections
 import modl_expr as expr
 import modl_parser
 import modl_scanner
@@ -15,25 +16,23 @@ BUILTIN = {
 
 class Environment():
     def __init__(self, parent=None):
-        self.parent = parent
-        self.contents = {}
-        self.contents['!'] = '!'
+        self.contents = parent or collections.ChainMap()
+        self.is_frozen = False
         
     def get(self, name):
-        if name in self.contents:
-            return self.contents[name]
-
-        if self.parent is None or name == '!':
-            raise Exception("Couldn't find symbol", name)
-
-        return self.parent.get(name);
+        return self.contents[name]
 
     def set(self, name, value):
-        try:
-            self.get(name)
-            raise Exception("Symbol already set", name, self.get(name))
-        except:
-            self.contents[name] = value
+        if self.is_frozen:
+            env = Environment(self.contents.new_child())
+        else:
+            env = self
+
+        env.contents[name] = value
+        return env
+
+    def freeze(self):
+        self.is_frozen = True
         
 
 class Function():
@@ -71,14 +70,14 @@ class Interpreter():
         elif isinstance(statement, expr.Let):
             name = statement.identifier.name
             (value, environment) = self.interpret(statement.value, environment)            
-            environment = Environment(environment) # Tree building!
-            environment.set(name, value) # TODO: Since nothing gets updated, this should just be part of environment creation.
+            environment = environment.set(name, value)
             return (value, environment)
         elif isinstance(statement, expr.Identifier):
             return (environment.get(statement.name), environment)
         elif isinstance(statement, expr.Grouping):
             return self.interpret(statement.expression, environment)
         elif isinstance(statement, expr.Function):
+            environment.freeze()
             return (Function(statement, environment), environment)
         elif isinstance(statement, expr.Builtin):
             return (BUILTIN[statement.name], environment)
@@ -91,7 +90,7 @@ class Interpreter():
             f_environment = f.environment
             args = f.function.args
             for name, value in zip(args, params):
-                f_environment.set(name.name, value)
+                f_environment = f_environment.set(name.name, value)
             if len(args) > len(params):
                 return (Function(expr.Function(args[len(params):], f.function.body), f_environment), environment)
             else:
