@@ -1,4 +1,4 @@
-use std;
+use "std.dl";
 
 /* Standard recursive fibonacci definition */
 let fibo <- { x |
@@ -25,9 +25,9 @@ let flatfibo <- { x |
 let a <- "outer";
 
 let f! <- { ! |
-	let showA! <- { ! | print! ! a; };
-	showA! !;
+	let showA! <- { ! | print! a; };
+	showA!;
 	let a <- "inner";
-	showA! !;
+	showA!;
 };
 

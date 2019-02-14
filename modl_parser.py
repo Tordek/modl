@@ -66,6 +66,10 @@ class Parser():
                 else:
                     break
             chain.append(e)
+
+        head = chain[0]
+        if isinstance(head, expr.Identifier) and head.name[-1] == '!': # Special case for bang functions.
+            chain = [chain[0], expr.Identifier('!')] + chain[1:]
         return expr.Expression(chain)
 
     def primary(self):
