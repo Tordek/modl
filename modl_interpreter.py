@@ -7,7 +7,7 @@ BUILTIN = {
     'print': lambda x: print(x),
     'add': lambda x, y: x + y,
     'sub': lambda x, y: x - y,
-    'read': lambda: input(),
+    'read': lambda _: input(),
     'eq': lambda x, y: x == y,
     'gt': lambda x, y: x > y,
     'if': lambda c, t, f: t if c else f,
@@ -60,7 +60,7 @@ class Interpreter():
             (right, environment) = self.interpret(statement.right, environment)
             return self.do_call(op, left, right, environment=environment)
         elif isinstance(statement, expr.Use):
-            with open(statement.identifier.name + ".dl") as file:
+            with open(statement.filename) as file:
                 contents = file.read()
                 scanner = modl_scanner.Scanner(contents)
                 parser = modl_parser.Parser(scanner.scan_tokens())

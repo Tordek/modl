@@ -15,8 +15,8 @@ class Parser():
     def statement(self):
         stmt = None
         if self.match(TokenType.USE):
-            identifier = self.identifier()
-            stmt = expr.Use(identifier)
+            string = self.consume("Need a filename to import", TokenType.STRING)
+            stmt = expr.Use(string.literal)
         elif self.match(TokenType.LET):
             identifier = None
             if self.match(TokenType.IDENTIFIER, TokenType.SYMBOLIC):

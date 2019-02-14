@@ -1,9 +1,9 @@
 class Use():
-    def __init__(self, identifier):
-        self.identifier = identifier
+    def __init__(self, filename):
+        self.filename = filename
 
     def __repr__(self):
-        return "USE " + repr(self.identifier)
+        return "USE " + repr(self.filename)
 
 
 class Let():
