@@ -17,22 +17,18 @@ BUILTIN = {
 class Environment():
     def __init__(self, parent=None):
         self.contents = parent or collections.ChainMap()
-        self.is_frozen = False
         
     def get(self, name):
         return self.contents[name]
 
     def set(self, name, value):
-        if self.is_frozen:
-            env = Environment(self.contents.new_child())
-        else:
-            env = self
+        self.contents[name] = value
 
-        env.contents[name] = value
-        return env
+    def get_child(self):
+        return Environment(self.contents.new_child())
 
-    def freeze(self):
-        self.is_frozen = True
+    def get_child_before(self, new):
+        return Environment(collections.ChainMap({}, *self.contents.maps, *new.contents.maps))
         
 
 class Function():
@@ -65,20 +61,19 @@ class Interpreter():
                 scanner = modl_scanner.Scanner(contents)
                 parser = modl_parser.Parser(scanner.scan_tokens())
                 for statement in parser.program():
-                    _, environment = self.interpret(statement, environment)
-            return (True, environment)
+                    result, environment = self.interpret(statement, environment)
+                return (result, environment)
         elif isinstance(statement, expr.Let):
             name = statement.identifier.name
             (value, environment) = self.interpret(statement.value, environment)            
-            environment = environment.set(name, value)
+            environment.set(name, value)
             return (value, environment)
         elif isinstance(statement, expr.Identifier):
             return (environment.get(statement.name), environment)
         elif isinstance(statement, expr.Grouping):
             return self.interpret(statement.expression, environment)
         elif isinstance(statement, expr.Function):
-            environment.freeze()
-            return (Function(statement, environment), environment)
+            return (Function(statement, environment.get_child()), environment.get_child())
         elif isinstance(statement, expr.Builtin):
             return (BUILTIN[statement.name], environment)
         else:
@@ -87,10 +82,10 @@ class Interpreter():
         
     def do_call(self, f, *params, environment): # Supongo que funciona igual que haber hecho sin el zip, 1 por 1, pero es una optimizacion...
         if isinstance(f, Function):
-            f_environment = f.environment
+            f_environment = f.environment.get_child_before(environment)
             args = f.function.args
             for name, value in zip(args, params):
-                f_environment = f_environment.set(name.name, value)
+                f_environment.set(name.name, value)
             if len(args) > len(params):
                 return (Function(expr.Function(args[len(params):], f.function.body), f_environment), environment)
             else:

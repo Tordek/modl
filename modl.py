@@ -34,7 +34,7 @@ def run_file(path):
         
 def run_prompt():
     env = modl_interpreter.Environment()
-    env = env.set("!", "!")
+    env.set("!", "!")
     while True:
         try:
             command = input("> ")
