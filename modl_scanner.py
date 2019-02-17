@@ -8,7 +8,7 @@ class Scanner():
         self.current = 0
         self.line = 1
         self.tokens = []
-        
+
     def scan_tokens(self):
         while not self.is_at_end():
             self.start = self.current
@@ -39,11 +39,9 @@ class Scanner():
             else:
                 self.add_token(TokenType.OPEN_BRACKETS)
         elif c == '}':
-            self.add_token(TokenType.CLOSE_BRACKETS)            
+            self.add_token(TokenType.CLOSE_BRACKETS)
         elif c == ',':
             self.add_token(TokenType.COMMA)
-        elif c in ":|='*%!+@#$_>%^&": # TODO: move to the bottom, make everything (?) a symbol. Also, check for non-latin chars
-            self.symbolic()
         elif c == '/':
             if self.match('*'):
                 self.comment()
@@ -66,7 +64,7 @@ class Scanner():
                 self.number()
             else:
                 self.symbolic()
-        elif c in [' ', '\r', '\t']:
+        elif c.isspace():
             return
         elif c == '\n':
             self.line += 1
@@ -78,7 +76,8 @@ class Scanner():
         elif c.isalpha():
             self.identifier()
         else:
-            raise Exception(self.line, "Unexpected character: '{}'".format(c))
+            # All other characters count as symbols
+            self.symbolic()
 
     def number(self):
         c = self.source[self.current - 1]
@@ -95,7 +94,7 @@ class Scanner():
                 self.symbolic() # -' is not
                 return
 
-        c = self.source[self.current - 1]        
+        c = self.source[self.current - 1]
         if c == '.':
             p = self.peek()
             if p is None: # -. and . aren't numbers
@@ -145,14 +144,15 @@ class Scanner():
 
         lexeme = self.current_lexeme()
         if lexeme == 'use':
-            self.add_token(TokenType.USE)            
+            self.add_token(TokenType.USE)
         elif lexeme == 'let':
             self.add_token(TokenType.LET)
-        elif lexeme[0].isupper():
-            self.add_token(TokenType.TYPENAME)
         else:
             self.match('!') # Optional ending bang
-            self.add_token(TokenType.IDENTIFIER)
+            if lexeme[0].isupper():
+                self.add_token(TokenType.TYPENAME)
+            else:
+                self.add_token(TokenType.IDENTIFIER)
 
     def valid_in_identifier(self, c):
         if c is None:
@@ -162,26 +162,64 @@ class Scanner():
         if c in "'_":
             return True
         return False
-    
+
     def symbolic(self):
-        while True:
-            c = self.peek()
-            if c is not None and c in "<>|=-+*'?!_@#$%^&*~": # ALL THE SYMBOLS
-                self.advance()
-            else:
-                lexeme = self.current_lexeme()
-                if lexeme == ':':
-                    self.add_token(TokenType.COLON)                        
-                elif lexeme == '|':
-                    self.add_token(TokenType.PIPE)
-                else:
-                    self.add_token(TokenType.SYMBOLIC)
-                break
+        while self.valid_as_symbolic(self.peek()):
+            self.advance()
+        lexeme = self.current_lexeme()
+        if lexeme == ':':
+            self.add_token(TokenType.COLON)
+        elif lexeme == '|':
+            self.add_token(TokenType.PIPE)
+        else:
+            self.add_token(TokenType.SYMBOLIC)
+
+    def valid_as_symbolic(self, c):
+        if c is None:
+            return False
+        elif c.isspace():
+            return False
+        elif c.isalnum():
+            return False
+        elif c in "!(){},":
+            return False
+        else:
+            return True
 
     def string(self):
+        literal = ""
         while self.peek() != '"' and not self.is_at_end():
-            if self.peek() == '\n':
+            c = self.peek() # Sure would like to have the walrus op
+            if c == '\n':
                 self.line += 1
+
+            if c == '\\':
+                # escape characters
+                self.advance()
+                if self.is_at_end():
+                    break
+                e = self.peek()
+                if e == "n":
+                    literal += "\n"
+                elif e == "r":
+                    literal += "\r"
+                elif e == "t":
+                    literal += "\t"
+                elif e == "\\":
+                    literal += "\\"
+                elif e == "\"":
+                    literal += "\""
+                elif e == "x":
+                    # fetch 4 characters as hex and decode as unicode
+                    codepoint = self.source[self.current+1:self.current+5]
+                    if len(codepoint) < 4:
+                        raise Exception(self.line, "Unterminated string")
+                    literal += chr(int(codepoint, 16))
+                    self.current += 4
+                else:
+                    raise Exception(self.line, "\\" + e + " is not an escape sequence")
+            else:
+                literal += c
             self.advance()
 
         if self.is_at_end():
@@ -190,7 +228,6 @@ class Scanner():
 
         self.advance() # Closing "
 
-        literal = self.current_lexeme()[1:-1]
         self.add_token(TokenType.STRING, literal)
 
     def comment(self):
@@ -207,7 +244,7 @@ class Scanner():
                 raise Exception(self.line, "Unterminated comment")
 
         # self.add_token(TokenType.COMMENT, self.current_lexeme())
-        
+
     def advance(self):
         self.current += 1
         return self.source[self.current-1]
