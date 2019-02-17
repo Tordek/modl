@@ -91,5 +91,7 @@ class Interpreter():
                 for statement in f.function.body:
                     (v, f_environment) = self.interpret(statement, f_environment)
                 return (v, environment)
-        else:            
+        elif callable(f):            
             return (f(*params), environment)
+        else:
+            raise Exception(f, "Tried to call a non-function object")
