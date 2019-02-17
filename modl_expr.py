@@ -1,3 +1,6 @@
+class TypedExpression():
+    types = []
+
 class Use():
     def __init__(self, filename):
         self.filename = filename
@@ -7,19 +10,17 @@ class Use():
 
 
 class Let():
-    def __init__(self, identifier, types, value):
-        self.identifier = identifier
-        self.types = types
-        self.value = value
+    def __init__(self, assignments):
+        self.assignments = assignments
 
     def __repr__(self):
-        if self.types:
-            return "LET " + repr(self.identifier) + ": " + repr(self.types) +" <- " + repr(self.value)
-        else:
-            return "LET " + repr(self.identifier) + " <- " + repr(self.value)
+        result = "LET "
+        for name, value in assignments:
+            result += repr(name) + " <- " + repr(value) + ", "
+        return result
         
         
-class Symchain():
+class Symchain(TypedExpression):
     def __init__(self, left, op, right):
         self.left = left
         self.op = op
@@ -29,14 +30,14 @@ class Symchain():
         return "(" + repr(self.left) + ") " + repr(self.op) + " (" + repr(self.right) + ")"
     
     
-class Identifier():
+class Identifier(TypedExpression):
     def __init__(self, name):
         self.name = name
 
     def __repr__(self):
         return self.name
 
-class Typename():
+class Typename(TypedExpression):
     def __init__(self, name):
         self.name = name
 
@@ -44,7 +45,7 @@ class Typename():
         return self.name
 
 
-class Expression():
+class Expression(TypedExpression):
     def __init__(self, call):
         self.call = call
 
@@ -52,7 +53,7 @@ class Expression():
         return repr(self.call)
     
     
-class Grouping():
+class Grouping(TypedExpression):
     def __init__(self, expression):
         self.expression = expression
 
@@ -60,7 +61,7 @@ class Grouping():
         return "(" + repr(self.expression) + ")"
     
 
-class Function():
+class Function(TypedExpression):
     def __init__(self, args, body):
         self.args = args
         self.body = body
@@ -69,7 +70,7 @@ class Function():
         return "Function {} of {} arguments".format(id(self), len(self.args))
     
 
-class Literal():
+class Literal(TypedExpression):
     def __init__(self, value, type):
         self.value = value
         self.type = type
@@ -81,7 +82,7 @@ class Literal():
             return repr(self.value)
     
 
-class Builtin():
+class Builtin(TypedExpression):
     def __init__(self, name):
         self.name = name
 

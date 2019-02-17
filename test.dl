@@ -31,3 +31,5 @@ let f! <- { ! |
 	showA!;
 };
 
+let odd <- { x | if (x == 0) { t | 0; } { f | even (x - 1); }; },
+    even <- { x | if (x == 0) { t | 1; } { f | odd (x - 1); }; }; 

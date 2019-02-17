@@ -15,8 +15,8 @@ BUILTIN = {
 
 
 class Environment():
-    def __init__(self, parent=None):
-        self.contents = parent or collections.ChainMap()
+    def __init__(self, contents=None):
+        self.contents = contents or collections.ChainMap()
         
     def get(self, name):
         return self.contents[name]
@@ -27,9 +27,6 @@ class Environment():
     def get_child(self):
         return Environment(self.contents.new_child())
 
-    def get_child_before(self, new):
-        return Environment(collections.ChainMap({}, *self.contents.maps, *new.contents.maps))
-        
 
 class Function():
     def __init__(self, function, environment):
@@ -64,16 +61,17 @@ class Interpreter():
                     result, environment = self.interpret(statement, environment)
                 return (result, environment)
         elif isinstance(statement, expr.Let):
-            name = statement.identifier.name
-            (value, environment) = self.interpret(statement.value, environment)            
-            environment.set(name, value)
-            return (value, environment)
+            env = environment.get_child()
+            for (name, value) in statement.assignments:
+                (evaluated_value, env) = self.interpret(value, env)
+                env.set(name.name, evaluated_value)
+            return (None, env)
         elif isinstance(statement, expr.Identifier):
             return (environment.get(statement.name), environment)
         elif isinstance(statement, expr.Grouping):
             return self.interpret(statement.expression, environment)
         elif isinstance(statement, expr.Function):
-            return (Function(statement, environment.get_child()), environment.get_child())
+            return (Function(statement, environment), environment)
         elif isinstance(statement, expr.Builtin):
             return (BUILTIN[statement.name], environment)
         else:
@@ -82,7 +80,7 @@ class Interpreter():
         
     def do_call(self, f, *params, environment): # Supongo que funciona igual que haber hecho sin el zip, 1 por 1, pero es una optimizacion...
         if isinstance(f, Function):
-            f_environment = f.environment.get_child_before(environment)
+            f_environment = f.environment.get_child()
             args = f.function.args
             for name, value in zip(args, params):
                 f_environment.set(name.name, value)

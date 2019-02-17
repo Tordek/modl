@@ -18,28 +18,27 @@ class Parser():
             string = self.consume("Need a filename to import", TokenType.STRING)
             stmt = expr.Use(string.literal)
         elif self.match(TokenType.LET):
+            stmt = self.let()
+        else:
+            stmt = self.symchain()
+        self.consume("Expect ';' at end of statement.", TokenType.SEMICOLON)
+        return stmt
+
+    def let(self):
+        assignments = []
+        while True:
             identifier = None
             if self.match(TokenType.IDENTIFIER, TokenType.SYMBOLIC):
                 identifier = expr.Identifier(self.previous().lexeme) # We only care about the name
             else:
                 raise Exception(self.peek(), "Can't assign to this")
             
-            types = []
-            if self.match(TokenType.COLON):
-                t = self.consume("Expected a type after :", TokenType.TYPENAME)
-                types.append(t.lexeme)
-                    
-                while self.match(TokenType.RIGHT_ARROW):
-                    t = self.consume("Expected a type after ->", TokenType.TYPENAME)
-                    types.append(t.lexeme)
-                    
             self.consume("Missing <-", TokenType.LEFT_ARROW)
-            symchain = self.symchain()
-            stmt = expr.Let(identifier, types, symchain)
-        else:
-            stmt = self.symchain()
-        self.consume("Expect ';' at end of statement.", TokenType.SEMICOLON)
-        return stmt
+            value = self.symchain()
+            assignments.append((identifier, value))
+            if not self.match(TokenType.COMMA):
+                break
+        return expr.Let(assignments)
 
     def symchain(self):
         e = self.expression()
@@ -77,8 +76,23 @@ class Parser():
         if result is None:
             raise Exception(self.peek(), "Unknown symbol")
         return result
+
+    def try_primary(self):
+        value = self.try_primary_()
+        types = []
+        if self.match(TokenType.COLON):
+            t = self.consume("Expected a type after :", TokenType.TYPENAME)
+            types.append(t.lexeme)
+                
+            while self.match(TokenType.RIGHT_ARROW):
+                t = self.consume("Expected a type after ->", TokenType.TYPENAME)
+                types.append(t.lexeme)
+        if value:
+            value.signature = types
+        return value
+                    
     
-    def try_primary(self):    
+    def try_primary_(self):    
         if self.match(TokenType.OPEN_BRACKETS):
             argument_list = []
             head_arg = self.consume("Argument list cannot be empty", TokenType.BANG, TokenType.IDENTIFIER)

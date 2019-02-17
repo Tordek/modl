@@ -6,6 +6,7 @@ class TokenType(enum.Enum):
     COLON = enum.auto()
     PIPE = enum.auto()
     BANG = enum.auto()
+    COMMA = enum.auto()
     OPEN_BRACKETS = enum.auto()
     CLOSE_BRACKETS = enum.auto()
     OPEN_PARENTHESES = enum.auto()

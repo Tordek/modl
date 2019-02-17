@@ -40,7 +40,9 @@ class Scanner():
                 self.add_token(TokenType.OPEN_BRACKETS)
         elif c == '}':
             self.add_token(TokenType.CLOSE_BRACKETS)            
-        elif c in ":|='*%!+@#$_>%^&":
+        elif c == ',':
+            self.add_token(TokenType.COMMA)
+        elif c in ":|='*%!+@#$_>%^&": # TODO: move to the bottom, make everything (?) a symbol. Also, check for non-latin chars
             self.symbolic()
         elif c == '/':
             if self.match('*'):

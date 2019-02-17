@@ -5,21 +5,23 @@ stmt = use
      | symchain
      ;
 
-use = USE IDENTIFIER ;
-let = LET ( IDENTIFIER | SYMBOLIC ) (COLON type_signature)? LEFT_ARROW symchain ;
-
-type_signature = typename (RIGHT_ARROW type_signature)* ;
+use = USE STRING ;
+let = LET let_body (COMMA let_body)* ;
+let_body = ( IDENTIFIER | SYMBOLIC ) LEFT_ARROW symchain ;
            
 symchain = expression (SYMBOLIC symchain)* ;
 
 expression = primary (primary)* ;
 
-primary = function
-        | STRING
-        | NUMBER
-        | IDENTIFIER
-        | BUILTIN
-        | OPEN_PARENTHESES symchain CLOSE_PARENTHESES
+type_signature = typename (RIGHT_ARROW type_signature)* ;
+
+primary = ( function
+          | STRING
+          | NUMBER
+          | IDENTIFIER
+          | BUILTIN
+          | OPEN_PARENTHESES symchain CLOSE_PARENTHESES
+          ) (COLON type_signature)?)
         ;
 
 function = OPEN_BRACE (BANG | identifier) identifier* PIPE statement* CLOSE_BRACE ;
