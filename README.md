@@ -44,9 +44,9 @@ i.e.,
 
     read!;
 
-is actually
+is actually parsed as
 
-    read!;
+    read! !;
 
 but
 
