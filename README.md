@@ -63,3 +63,9 @@ Every assignment begins a new scope; values can't see assignments that happen la
 
     let odd <- { x | if (x == 0) { t | 0; } { f | even (x - 1); }; },
         even <- { x | if (x == 0) { t | 1; } { f | odd (x - 1); }; }; 
+
+TODO:
+-----
+
+- Make the interpreter able to work on partial (and multiple!) input
+- Make the scanner and parser not take the whole input in the constructor (ew, state)
