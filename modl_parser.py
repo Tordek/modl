@@ -116,6 +116,24 @@ class Parser():
             e = self.symchain()
             self.consume("Missing closing parentheses", TokenType.CLOSE_PARENTHESES)
             return expr.Grouping(e)
+        elif self.match(TokenType.COND):
+            cases = []
+            while True:
+                self.consume("Missing condition delimiter", TokenType.PIPE)
+                condition = self.symchain()
+                self.consume("Missing condition delimiter", TokenType.RIGHT_ARROW)
+                
+                body = []
+                while True:
+                    if self.check(TokenType.PIPE, TokenType.END):
+                        break
+                    body.append(self.statement())
+                cases.append((condition, body))
+                
+                if self.match(TokenType.END):
+                    break
+                
+            return expr.Conditional(cases)
         else:
             return None
 

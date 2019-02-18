@@ -147,6 +147,10 @@ class Scanner():
             self.add_token(TokenType.USE)
         elif lexeme == 'let':
             self.add_token(TokenType.LET)
+        elif lexeme == 'end':
+            self.add_token(TokenType.END)
+        elif lexeme == 'cond':
+            self.add_token(TokenType.COND)
         else:
             self.match('!') # Optional ending bang
             if lexeme[0].isupper():

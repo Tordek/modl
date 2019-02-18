@@ -20,15 +20,13 @@ let flatfibo <- { x |
    fib x 1 1;
 };
 
-/*
-let fibo_cond { x |
+let fibo_cond <- { x |
     cond
-    | x == 0 : 1;
-    | x == 1 : 1;
-    | otherwise : fibo_cond (x - 1) + fibo_cond (x - 2);
+    | x == 0 -> 1;
+    | x == 1 -> 1;
+    | otherwise -> fibo_cond (x - 1) + fibo_cond (x - 2);
     end;
 };
-*/           
 
 /* Test for scope */
 let a <- "outer";

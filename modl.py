@@ -22,6 +22,7 @@ def run_file(path):
     with codecs.open(path, encoding="utf8") as script:
         env = ChainMap()
         env["!"] = "!"
+        env["otherwise"] = True
         interpreter = modl_interpreter.Interpreter()
 
         scanner = modl_scanner.Scanner(command)
@@ -36,6 +37,7 @@ def run_file(path):
 def run_prompt():
     env = ChainMap()
     env["!"] = "!"
+    env["otherwise"] = True
     while True:
         try:
             command = input("> ")

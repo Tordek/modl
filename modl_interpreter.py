@@ -60,6 +60,20 @@ class Interpreter():
             return (Function(statement, environment), environment)
         elif isinstance(statement, expr.Builtin):
             return (BUILTIN[statement.name], environment)
+        elif isinstance(statement, expr.Conditional):
+            # Discard the environment from the evaluation
+            # to disallow `let`s done inside a case
+            for condition, body in statement.cases:
+                value, _ = self.interpret(condition, environment)
+                if value is True:
+                    env = environment
+                    for st in body:
+                        result, env = self.interpret(st, env)
+                    return result, environment
+                elif value is False:
+                    continue
+                else:
+                    raise Exception("Type mismatch, condition must be boolean")
         else:
             raise Exception("Trying to run unknown thing", statement)
 

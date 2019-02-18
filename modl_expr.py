@@ -87,5 +87,14 @@ class Builtin(TypedExpression):
         self.name = name
 
     def __repr__(self):
-        return '#' + self.name.lexeme
+        return '#' + self.name
 
+
+class Conditional(TypedExpression):
+    def __init__(self, cases):
+        self.cases = cases
+
+    def __repr__(self):
+        result = "COND "
+        result += "\n| ".join(repr(cond) + " -> " + repr(body) for cond, body in self.cases)
+        return result

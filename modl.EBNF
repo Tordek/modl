@@ -16,6 +16,7 @@ expression = primary (primary)* ;
 type_signature = typename (RIGHT_ARROW type_signature)* ;
 
 primary = ( function
+          | cond
           | STRING
           | NUMBER
           | IDENTIFIER
@@ -23,5 +24,7 @@ primary = ( function
           | OPEN_PARENTHESES symchain CLOSE_PARENTHESES
           ) (COLON type_signature)?)
         ;
+
+cond = COND (PIPE symchain LEFT_ARROW statement+)+ END ;
 
 function = OPEN_BRACE (BANG | identifier) identifier* PIPE statement* CLOSE_BRACE ;
