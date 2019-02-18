@@ -5,6 +5,7 @@ import traceback
 import modl_parser
 import modl_scanner
 import modl_interpreter
+from collections import ChainMap
 
 
 def main(args):
@@ -19,8 +20,8 @@ def main(args):
 
 def run_file(path):
     with codecs.open(path, encoding="utf8") as script:
-        env = modl_interpreter.Environment()
-        env = env.set("!", "!")
+        env = ChainMap()
+        env["!"] = "!"
         interpreter = modl_interpreter.Interpreter()
 
         scanner = modl_scanner.Scanner(command)
@@ -33,8 +34,8 @@ def run_file(path):
         
         
 def run_prompt():
-    env = modl_interpreter.Environment()
-    env.set("!", "!")
+    env = ChainMap()
+    env["!"] = "!"
     while True:
         try:
             command = input("> ")

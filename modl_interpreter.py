@@ -14,20 +14,6 @@ BUILTIN = {
 }
 
 
-class Environment():
-    def __init__(self, contents=None):
-        self.contents = contents or collections.ChainMap()
-        
-    def get(self, name):
-        return self.contents[name]
-
-    def set(self, name, value):
-        self.contents[name] = value
-
-    def get_child(self):
-        return Environment(self.contents.new_child())
-
-
 class Function():
     def __init__(self, function, environment):
         self.function = function
@@ -61,13 +47,13 @@ class Interpreter():
                     result, environment = self.interpret(statement, environment)
                 return (result, environment)
         elif isinstance(statement, expr.Let):
-            env = environment.get_child()
+            env = environment.new_child()
             for (name, value) in statement.assignments:
                 (evaluated_value, env) = self.interpret(value, env)
-                env.set(name.name, evaluated_value)
+                env[name.name] = evaluated_value
             return (None, env)
         elif isinstance(statement, expr.Identifier):
-            return (environment.get(statement.name), environment)
+            return (environment[statement.name], environment)
         elif isinstance(statement, expr.Grouping):
             return self.interpret(statement.expression, environment)
         elif isinstance(statement, expr.Function):
@@ -80,10 +66,10 @@ class Interpreter():
         
     def do_call(self, f, *params, environment): # Supongo que funciona igual que haber hecho sin el zip, 1 por 1, pero es una optimizacion...
         if isinstance(f, Function):
-            f_environment = f.environment.get_child()
+            f_environment = f.environment.new_child()
             args = f.function.args
             for name, value in zip(args, params):
-                f_environment.set(name.name, value)
+                f_environment[name.name] = value
             if len(args) > len(params):
                 return (Function(expr.Function(args[len(params):], f.function.body), f_environment), environment)
             else:
