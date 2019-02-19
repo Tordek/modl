@@ -11,15 +11,15 @@ let fibo <- { x |
 
 
 /* Prettier, less deeply recursive fibonacci */
-let flatfibo <- { x |
-   let fib <- { x a b |
-      cond
-      | x == 0 -> a;
-      | otherwise -> fib (x - 1) b (a + b);
-      end;
-   };
-   fib x 1 1;
+let fib <- { a b x |
+  cond
+  | x == 0 -> a;
+  | otherwise -> fib b (a + b) (x - 1);
+  end;
 };
+
+/* Currying is available */
+let flatfibo <- fib 1 1;
 
 /* Test for scope */
 let a <- "outer";
