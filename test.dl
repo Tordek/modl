@@ -2,30 +2,23 @@ use "std.dl";
 
 /* Standard recursive fibonacci definition */
 let fibo <- { x |
-	if (x == 0)
-	{ t | 1; }
-	{ f | if (x == 1)
-		{ t | 1; }
-		{ f | fibo (x - 1) + fibo (x - 2); };
-	};
+    cond
+    | x == 0 -> 1;
+    | x == 1 -> 1;
+    | otherwise -> fibo (x - 1) + fibo (x - 2);
+    end;
 };
+
 
 /* Prettier, less deeply recursive fibonacci */
 let flatfibo <- { x |
    let fib <- { x a b |
-      if (x == 0)
-      { t | a; }
-      { f | fib (x - 1) b (a + b); };
+      cond
+      | x == 0 -> a;
+      | otherwise -> fib (x - 1) b (a + b);
+      end;
    };
    fib x 1 1;
-};
-
-let fibo_cond <- { x |
-    cond
-    | x == 0 -> 1;
-    | x == 1 -> 1;
-    | otherwise -> fibo_cond (x - 1) + fibo_cond (x - 2);
-    end;
 };
 
 /* Test for scope */
@@ -37,5 +30,16 @@ let f! <- { ! |
 	showA!;
 };
 
-let odd <- { x | if (x == 0) { t | 0; } { f | even (x - 1); }; },
-    even <- { x | if (x == 0) { t | 1; } { f | odd (x - 1); }; }; 
+/* Mutual recursion */
+let odd <- { x |
+        cond
+        | (x == 0) -> 0;
+        | otherwise -> even (x - 1);
+        end;
+    },
+    even <- { x | 
+        cond
+        | (x == 0) -> 1;
+        | otherwise -> odd (x - 1);
+        end;
+    };
