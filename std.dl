@@ -1,15 +1,48 @@
 /* The "Standard Library" */
 
-let + <- { x y | {#add} x y; };
+/* IO */
 
 let print! <- { ! s | {#print} s; };
-
-let > <- { x y | {#gt} x y; };
-
-let == <- { x y | {#eq} x y; };
-
 let read! <- { ! | {#read} !; };
 
-let if <- { c t f | ({#if} c t f) 1; };
+/* Boolean. NOT short-circuited. */
+let || <- { x y |
+    cond
+    | x -> true;
+    | otherwise -> y;
+    end;
+};
 
+let && <- { x y |
+    cond
+    | x -> y;
+    | otherwise -> false;
+    end;
+};
+
+let not <- { x |
+    cond
+    | x -> false;
+    | otherwise -> true;
+    end;
+};
+
+/* Arithmetics */
+let + <- { x y | {#add} x y; };
 let - <- { x y | {#sub} x y; };
+let * <- { x y | {#mul} x y; };
+let / <- { x y | {#fdiv} x y; };
+let % <- { x y | {#mod} x y; };
+
+/* Comparisons */
+let == <- { x y | {#eq} x y; };
+let > <- { x y | {#gt} x y; };
+let >= <- { x y |
+    cond
+    | x == y -> true;
+    | x > y -> true;
+    | otherwise -> false;
+    end;
+};
+let < <- { x y | not (x >= y); };
+let <= <- { x y | not (x > y); };
