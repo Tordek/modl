@@ -40,7 +40,7 @@ When run, both are executed in order (ideally, you're a good functional boy and 
 
 `!` functions are kinda special: In order to allow for zero-argument functions like `read!` (for reading input from the user), whenever the first call in an expression is a `!` function, an implicit `!` is passed:
 
-i.e., 
+i.e.,
 
     read!;
 
@@ -59,10 +59,17 @@ Scoping
 
 Scope is where the let is.
 
-Every assignment begins a new scope; values can't see assignments that happen later. However, within a single let, the scope is shared. This is useful for defining mutually-recursive functions, like the extremely useful...
+Every assignment begins a new scope; values can't see assignments that happen later. However, within a single let, the scope is shared. This is useful for defining mutually-recursive functions, like the extremely useful `odd` and `even` pair in the `test.dl` file. Be careful, however: things are still evaluated in order, so this:
 
-    let odd <- { x | if (x == 0) { t | 0; } { f | even (x - 1); }; },
-        even <- { x | if (x == 0) { t | 1; } { f | odd (x - 1); }; }; 
+    let a <- add1 5,
+        add1 <- { x | x + 1; };
+
+won't work because `a` tries to evaluate `add1` before it's been defined. You need to do it the other way around:
+
+     let add1 <- { x | x + 1; },
+         a <- add1 5;
+
+but you should probably have done it in two `let`s anyway.
 
 TODO:
 -----
