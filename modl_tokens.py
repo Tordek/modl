@@ -1,5 +1,6 @@
 import enum
 
+
 class TokenType(enum.Enum):
     # Single-Character tokens
     SEMICOLON = enum.auto()
@@ -21,23 +22,24 @@ class TokenType(enum.Enum):
     COMMENT_END = enum.auto()
     EQUALS = enum.auto()
 
-    # Symbol tokens
-    SYMBOLIC = enum.auto() # Anything not beginning in [a-zA-Z0-9_]  that isn't above
-    
+    # Symbol tokens, anything not beginning in isalpha() that isn't above
+    SYMBOLIC = enum.auto()
+
     # Keywords
     USE = enum.auto()
     LET = enum.auto()
 
     # Literals
-    IDENTIFIER = enum.auto() # [a-z][a-zA-Z0-9'-|]!?
-    TYPENAME = enum.auto() # [A-Z][a-zA-Z0-9]
-    STRING = enum.auto() # ".*"
-    B10_INTEGER = enum.auto() # -?[0-9]+
+    IDENTIFIER = enum.auto()  # !isupper()[isalpha()'_|]+!?
+    TYPENAME = enum.auto()  # isupper()(isalpha'_|)+
+    STRING = enum.auto()  # ".*"
+    B10_INTEGER = enum.auto()
     B10_FLOAT = enum.auto()
     BUILTIN = enum.auto()
-    
+
     EOF = enum.auto()
     pass
+
 
 class Token():
     def __init__(self, token_type, lexeme, literal, line):
@@ -45,9 +47,10 @@ class Token():
         self.lexeme = lexeme
         self.literal = literal
         self.line = line
-      
+
     def __repr__(self):
         if self.literal:
             return "{} '{}'".format(self.token_type, self.lexeme)
         else:
-            return "{} '{}' {}".format(self.token_type, self.lexeme, self.literal)
+            return "{} '{}' {}".format(self.token_type, self.lexeme,
+                                       self.literal)

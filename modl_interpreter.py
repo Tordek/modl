@@ -19,7 +19,7 @@ class Function():
         self.function = function
         self.environment = environment
 
-        
+
 class Interpreter():
     def interpret(self, statement, environment):
         if isinstance(statement, expr.Literal):
@@ -44,7 +44,8 @@ class Interpreter():
                 scanner = modl_scanner.Scanner(contents)
                 parser = modl_parser.Parser(scanner.scan_tokens())
                 for statement in parser.program():
-                    result, environment = self.interpret(statement, environment)
+                    result, environment = self.interpret(statement,
+                                                         environment)
                 return (result, environment)
         elif isinstance(statement, expr.Let):
             env = environment.new_child()
@@ -77,21 +78,23 @@ class Interpreter():
         else:
             raise Exception("Trying to run unknown thing", statement)
 
-        
-    def do_call(self, f, *params, environment): # Supongo que funciona igual que haber hecho sin el zip, 1 por 1, pero es una optimizacion...
+    def do_call(self, f, *params, environment):
+        # Currying, but optimized if there are multiple parameters
         if isinstance(f, Function):
-            f_environment = f.environment.new_child()
+            f_env = f.environment.new_child()
             args = f.function.args
             for name, value in zip(args, params):
-                f_environment[name.name] = value
+                f_env[name.name] = value
             if len(args) > len(params):
-                return (Function(expr.Function(args[len(params):], f.function.body), f_environment), environment)
+                return (Function(expr.Function(args[len(params):],
+                                               f.function.body), f_env),
+                        environment)
             else:
                 v = None
                 for statement in f.function.body:
-                    (v, f_environment) = self.interpret(statement, f_environment)
+                    (v, f_env) = self.interpret(statement, f_env)
                 return (v, environment)
-        elif callable(f):            
+        elif callable(f):
             return (f(*params), environment)
         else:
             raise Exception(f, "Tried to call a non-function object")

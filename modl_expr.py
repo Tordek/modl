@@ -1,6 +1,7 @@
 class TypedExpression():
     types = []
 
+
 class Use():
     def __init__(self, filename):
         self.filename = filename
@@ -18,8 +19,8 @@ class Let():
         for name, value in assignments:
             result += repr(name) + " <- " + repr(value) + ", "
         return result
-        
-        
+
+
 class Symchain(TypedExpression):
     def __init__(self, left, op, right):
         self.left = left
@@ -27,9 +28,10 @@ class Symchain(TypedExpression):
         self.right = right
 
     def __repr__(self):
-        return "(" + repr(self.left) + ") " + repr(self.op) + " (" + repr(self.right) + ")"
-    
-    
+        return ("(" + repr(self.left) + ") " +
+                repr(self.op) + " (" + repr(self.right) + ")")
+
+
 class Identifier(TypedExpression):
     def __init__(self, name):
         self.name = name
@@ -37,7 +39,8 @@ class Identifier(TypedExpression):
     def __repr__(self):
         return self.name
 
-class Typename(TypedExpression):
+
+class Typename():
     def __init__(self, name):
         self.name = name
 
@@ -51,15 +54,15 @@ class Expression(TypedExpression):
 
     def __repr__(self):
         return repr(self.call)
-    
-    
+
+
 class Grouping(TypedExpression):
     def __init__(self, expression):
         self.expression = expression
 
     def __repr__(self):
         return "(" + repr(self.expression) + ")"
-    
+
 
 class Function(TypedExpression):
     def __init__(self, args, body):
@@ -68,19 +71,15 @@ class Function(TypedExpression):
 
     def __repr__(self):
         return "Function {} of {} arguments".format(id(self), len(self.args))
-    
+
 
 class Literal(TypedExpression):
-    def __init__(self, value, type):
+    def __init__(self, value):
         self.value = value
-        self.type = type
 
     def __repr__(self):
-        if self.type:
-            return "[" + repr(self.type) + "] " + str(self.value)
-        else:
-            return repr(self.value)
-    
+        return repr(self.value)
+
 
 class Builtin(TypedExpression):
     def __init__(self, name):
@@ -96,5 +95,6 @@ class Conditional(TypedExpression):
 
     def __repr__(self):
         result = "COND "
-        result += "\n| ".join(repr(cond) + " -> " + repr(body) for cond, body in self.cases)
+        result += "\n| ".join(repr(cond) + " -> " + repr(body)
+                              for cond, body in self.cases)
         return result

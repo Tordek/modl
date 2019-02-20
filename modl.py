@@ -16,7 +16,7 @@ def main(args):
         exit(run_file(args[1]))
     else:
         run_prompt()
-        
+
 
 def run_file(path):
     with codecs.open(path, encoding="utf8") as script:
@@ -30,10 +30,10 @@ def run_file(path):
 
         for statement in parser.program():
             (result, env) = interpreter.interpret(statement, env)
-        
+
         return result
-        
-        
+
+
 def run_prompt():
     env = ChainMap()
     env["!"] = "!"
@@ -49,7 +49,7 @@ def run_prompt():
             hadError = False
         except Exception as e:
             print(traceback.format_exc())
-    
+
 
 def error(line, message):
     report(line, "", message)
@@ -57,9 +57,10 @@ def error(line, message):
 
 def report(line, where, message):
     global hadError
-    print("[line {}] Error{}: {}".format(line, where, message), file=sys.stderr)
+    print("[line {}] Error{}: {}".format(line, where, message),
+          file=sys.stderr)
     hadError = True
 
-    
+
 if __name__ == "__main__":
     main(sys.argv)

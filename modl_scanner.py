@@ -1,5 +1,6 @@
 from modl_tokens import Token, TokenType
 
+
 class Scanner():
     def __init__(self, source):
         self.source = source
@@ -35,7 +36,8 @@ class Scanner():
                 self.identifier()
                 self.match('}')
                 builtin = self.tokens.pop()
-                self.tokens.append(Token(TokenType.BUILTIN, builtin.lexeme[2:], None, self.line))
+                self.tokens.append(Token(TokenType.BUILTIN,
+                                         builtin.lexeme[2:], None, self.line))
             else:
                 self.add_token(TokenType.OPEN_BRACKETS)
         elif c == '}':
@@ -88,16 +90,16 @@ class Scanner():
                 return
             elif p in ' \r\t\n':
                 pass
-            elif p == '.' or p.isnumeric(): # -.5 is valid, -5 is, too.
+            elif p == '.' or p.isnumeric():  # -.5 is valid, -5 is, too.
                 self.advance()
             else:
-                self.symbolic() # -' is not
+                self.symbolic()  # -' is not
                 return
 
         c = self.source[self.current - 1]
         if c == '.':
             p = self.peek()
-            if p is None: # -. and . aren't numbers
+            if p is None:  # -. and . aren't numbers
                 self.symbolic()
                 return
             elif p in ' \r\t\n':
@@ -114,7 +116,7 @@ class Scanner():
             elif c == '.' or c.isnumeric():
                 pass
             else:
-                self.symbolic() # -.- is not a number
+                self.symbolic()  # -.- is not a number
                 return
 
         is_decimal = False
@@ -136,7 +138,8 @@ class Scanner():
         if is_decimal:
             self.add_token(TokenType.B10_FLOAT, float(self.current_lexeme()))
         else:
-            self.add_token(TokenType.B10_INTEGER, int(self.current_lexeme(), 10))
+            self.add_token(TokenType.B10_INTEGER,
+                           int(self.current_lexeme(), 10))
 
     def identifier(self):
         while self.valid_in_identifier(self.peek()):
@@ -152,7 +155,7 @@ class Scanner():
         elif lexeme == 'cond':
             self.add_token(TokenType.COND)
         else:
-            self.match('!') # Optional ending bang
+            self.match('!')  # Optional ending bang
             if lexeme[0].isupper():
                 self.add_token(TokenType.TYPENAME)
             else:
@@ -193,12 +196,11 @@ class Scanner():
     def string(self):
         literal = ""
         while self.peek() != '"' and not self.is_at_end():
-            c = self.peek() # Sure would like to have the walrus op
+            c = self.peek()  # Sure would like to have the walrus op
             if c == '\n':
                 self.line += 1
 
-            if c == '\\':
-                # escape characters
+            if c == '\\':  # Escape characters
                 self.advance()
                 if self.is_at_end():
                     break
@@ -221,7 +223,8 @@ class Scanner():
                     literal += chr(int(codepoint, 16))
                     self.current += 4
                 else:
-                    raise Exception(self.line, "\\" + e + " is not an escape sequence")
+                    raise Exception(self.line,
+                                    "\\" + e + " is not an escape sequence")
             else:
                 literal += c
             self.advance()
@@ -230,7 +233,7 @@ class Scanner():
             raise Exception(self.line, "Unterminated string")
             return
 
-        self.advance() # Closing "
+        self.advance()  # Closing "
 
         self.add_token(TokenType.STRING, literal)
 
@@ -267,7 +270,9 @@ class Scanner():
         return self.source[self.start:self.current]
 
     def add_token(self, token_type, literal=None):
-        self.tokens.append(Token(token_type, self.current_lexeme(), literal, self.line))
+        self.tokens.append(
+            Token(token_type, self.current_lexeme(), literal, self.line)
+        )
 
     def match(self, c):
         if self.is_at_end():
