@@ -29,8 +29,6 @@ class Scanner():
             self.add_token(TokenType.OPEN_PARENTHESES)
         elif c == ')':
             self.add_token(TokenType.CLOSE_PARENTHESES)
-        elif c == '!':
-            self.add_token(TokenType.BANG)
         elif c == '{':
             if self.match('#'):
                 self.identifier()
@@ -49,15 +47,8 @@ class Scanner():
                 self.comment()
             else:
                 self.symbolic()
-        elif c == '<':
-            if self.match('-'):
-                self.add_token(TokenType.LEFT_ARROW)
-            else:
-                self.symbolic()
         elif c == '-':
-            if self.match('>'):
-                self.add_token(TokenType.RIGHT_ARROW)
-            elif self.peek().isnumeric() or self.peek() == '.':
+            if self.peek().isnumeric() or self.peek() == '.':
                 self.number()
             else:
                 self.symbolic()
@@ -119,7 +110,6 @@ class Scanner():
                 self.symbolic()  # -.- is not a number
                 return
 
-        is_decimal = False
         while True:
             c = self.peek()
             if c is None or c in ' \r\t\n':
@@ -127,15 +117,11 @@ class Scanner():
             if c.isnumeric():
                 self.advance()
             elif c == '.':
-                if is_decimal:
-                    raise Exception(self.line, "Wrong number literal")
-                    return
-                is_decimal = True
                 self.advance()
             else:
                 break
 
-        if is_decimal:
+        if "." in self.current_lexeme():
             self.add_token(TokenType.B10_FLOAT, float(self.current_lexeme()))
         else:
             self.add_token(TokenType.B10_INTEGER,
@@ -170,14 +156,20 @@ class Scanner():
             return True
         return False
 
+    reserved_symbols = {
+        "->": TokenType.RIGHT_ARROW,
+        "<-": TokenType.LEFT_ARROW,
+        "!": TokenType.BANG,
+        "|": TokenType.PIPE,
+        ":": TokenType.COLON
+    }
+
     def symbolic(self):
         while self.valid_as_symbolic(self.peek()):
             self.advance()
         lexeme = self.current_lexeme()
-        if lexeme == ':':
-            self.add_token(TokenType.COLON)
-        elif lexeme == '|':
-            self.add_token(TokenType.PIPE)
+        if lexeme in self.reserved_symbols:
+            self.add_token(self.reserved_symbols[lexeme])
         else:
             self.add_token(TokenType.SYMBOLIC)
 
@@ -188,7 +180,7 @@ class Scanner():
             return False
         elif c.isalnum():
             return False
-        elif c in "!(){},":
+        elif c in "(){},":
             return False
         else:
             return True
