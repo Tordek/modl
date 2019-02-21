@@ -1,5 +1,5 @@
-import modl_expr as expr
-from modl_tokens import Token, TokenType
+import expr
+from .tokens import Token, TokenType
 
 
 class Parser():

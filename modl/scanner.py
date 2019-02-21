@@ -1,4 +1,4 @@
-from modl_tokens import Token, TokenType
+from .tokens import Token, TokenType
 
 
 class Scanner():

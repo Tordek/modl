@@ -2,9 +2,9 @@ import sys
 import codecs
 import traceback
 
-import modl_parser
-import modl_scanner
-import modl_interpreter
+import .parser
+import .scanner
+import .interpreter
 from collections import ChainMap
 
 
@@ -23,10 +23,10 @@ def run_file(path):
         env = ChainMap()
         env["!"] = "!"
         env["otherwise"] = True
-        interpreter = modl_interpreter.Interpreter()
+        interpreter = interpreter.Interpreter()
 
-        scanner = modl_scanner.Scanner(command)
-        parser = modl_parser.Parser(scanner.scan_tokens())
+        scanner = scanner.Scanner(command)
+        parser = parser.Parser(scanner.scan_tokens())
 
         for statement in parser.program():
             (result, env) = interpreter.interpret(statement, env)
@@ -41,9 +41,9 @@ def run_prompt():
     while True:
         try:
             command = input("> ")
-            scanner = modl_scanner.Scanner(command)
-            parser = modl_parser.Parser(scanner.scan_tokens())
-            interpreter = modl_interpreter.Interpreter()
+            scanner = scanner.Scanner(command)
+            parser = parser.Parser(scanner.scan_tokens())
+            interpreter = interpreter.Interpreter()
             (result, env) = interpreter.interpret(parser.statement(), env)
             print(result)
             hadError = False
