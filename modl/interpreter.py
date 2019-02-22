@@ -24,20 +24,28 @@ class Interpreter:
     def interpret(self, statement, environment):
         if isinstance(statement, expr.Literal):
             return (statement.value, environment)
+        elif isinstance(statement, expr.Identifier):
+            return (environment[statement.name], environment)
+        elif isinstance(statement, expr.Grouping):
+            return self.interpret(statement.expression, environment)
+        elif isinstance(statement, expr.Function):
+            return (Function(statement, environment), environment)
+        elif isinstance(statement, expr.Builtin):
+            return (BUILTIN[statement.name], environment)
         elif isinstance(statement, expr.Expression):
             results = []
             for s in statement.call:
-                result, environment = self.interpret(s, environment)
+                result, _ = self.interpret(s, environment)
                 results.append(result)
             if len(results) == 1:
                 return (results[0], environment)
             else:
-                return self.do_call(*results, environment=environment)
+                return (self.do_call(*results), environment)
         elif isinstance(statement, expr.Symchain):
-            (left, environment) = self.interpret(statement.left, environment)
-            (op, environment) = self.interpret(statement.op, environment)
-            (right, environment) = self.interpret(statement.right, environment)
-            return self.do_call(op, left, right, environment=environment)
+            (left, _) = self.interpret(statement.left, environment)
+            (op, _) = self.interpret(statement.op, environment)
+            (right, _) = self.interpret(statement.right, environment)
+            return (self.do_call(op, left, right), environment)
         elif isinstance(statement, expr.Use):
             with open(statement.filename) as file:
                 contents = file.read()
@@ -47,19 +55,11 @@ class Interpreter:
                     result, environment = self.interpret(statement, environment)
                 return (result, environment)
         elif isinstance(statement, expr.Let):
-            env = environment.new_child()
+            environment = environment.new_child()
             for (name, value) in statement.assignments:
-                (evaluated_value, env) = self.interpret(value, env)
-                env[name.name] = evaluated_value
-            return (None, env)
-        elif isinstance(statement, expr.Identifier):
-            return (environment[statement.name], environment)
-        elif isinstance(statement, expr.Grouping):
-            return self.interpret(statement.expression, environment)
-        elif isinstance(statement, expr.Function):
-            return (Function(statement, environment), environment)
-        elif isinstance(statement, expr.Builtin):
-            return (BUILTIN[statement.name], environment)
+                (evaluated_value, _) = self.interpret(value, environment)
+                environment[name.name] = evaluated_value
+            return (None, environment)
         elif isinstance(statement, expr.Conditional):
             # Discard the environment from the evaluation
             # to disallow `let`s done inside a case
@@ -77,7 +77,7 @@ class Interpreter:
         else:
             raise Exception("Trying to run unknown thing", statement)
 
-    def do_call(self, f, *params, environment):
+    def do_call(self, f, *params):
         # Currying, but optimized if there are multiple parameters
         if isinstance(f, Function):
             f_env = f.environment.new_child()
@@ -85,18 +85,13 @@ class Interpreter:
             for name, value in zip(args, params):
                 f_env[name.name] = value
             if len(args) > len(params):
-                return (
-                    Function(
-                        expr.Function(args[len(params) :], f.function.body), f_env
-                    ),
-                    environment,
-                )
+                return Function(expr.Function(args[len(params) :], f.function.body), f_env)
             else:
                 v = None
                 for statement in f.function.body:
                     (v, f_env) = self.interpret(statement, f_env)
-                return (v, environment)
+                return v
         elif callable(f):
-            return (f(*params), environment)
+            return f(*params)
         else:
             raise Exception(f, "Tried to call a non-function object")
