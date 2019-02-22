@@ -21,6 +21,7 @@ class Scanner:
         ":": TokenType.COLON,
     }
 
+    # Reserved words may appear as part of a longer token
     reserved_words = {
         "use": TokenType.USE,
         "let": TokenType.LET,
@@ -204,7 +205,6 @@ class Scanner:
             if self.peek() == "\n":
                 self.line += 1
             self.advance()
-
 
         # self.add_token(TokenType.COMMENT, self.current_lexeme())
 

@@ -1,8 +1,5 @@
 import os
 import sys
-
-sys.path.insert(0, os.path.abspath(".."))
-sys.path.insert(0, os.path.abspath("."))
 import unittest
 from modl.scanner import Scanner
 from modl.tokens import TokenType
@@ -72,7 +69,7 @@ class TestScannerTokens(unittest.TestCase):
     valid_identifiers = ["foo", "bar_baz", "quux'", "read!", "add4", "plus5!"]
 
     # Sequences containing unique characters that may not be part of a symbol
-    invalid_symbols = ["-{", "/a", "-)"]
+    invalid_symbols = ["-{", "/a", "-)", "+,+"]
 
     def test_valid_integers(self):
         for string, literal in self.valid_integers.items():
