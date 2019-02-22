@@ -2,6 +2,31 @@ from .tokens import Token, TokenType
 
 
 class Scanner():
+    # These tokens may not appear as part of a longer token
+    unique_tokens = {
+        ";": TokenType.SEMICOLON,
+        "}": TokenType.CLOSE_BRACKETS,
+        "(": TokenType.OPEN_PARENTHESES,
+        ")": TokenType.CLOSE_PARENTHESES,
+        ",": TokenType.COMMA,
+    }
+
+    # These tokens are reserved, but may appear as part of a longer token.
+    reserved_symbols = {
+        "->": TokenType.RIGHT_ARROW,
+        "<-": TokenType.LEFT_ARROW,
+        "!": TokenType.BANG,
+        "|": TokenType.PIPE,
+        ":": TokenType.COLON
+    }
+
+    reserved_words = {
+        'use': TokenType.USE,
+        'let': TokenType.LET,
+        'end': TokenType.END,
+        'cond': TokenType.COND,
+    }
+
     def __init__(self, source):
         self.source = source
 
@@ -23,13 +48,10 @@ class Scanner():
 
     def scan_token(self):
         c = self.advance()
-        if c == ';':
-            self.add_token(TokenType.SEMICOLON)
-        elif c == '(':
-            self.add_token(TokenType.OPEN_PARENTHESES)
-        elif c == ')':
-            self.add_token(TokenType.CLOSE_PARENTHESES)
+        if c in self.unique_tokens:
+            self.add_token(self.unique_tokens[c])
         elif c == '{':
+            # TODO: Cleanup
             if self.match('#'):
                 self.identifier()
                 self.match('}')
@@ -38,34 +60,21 @@ class Scanner():
                                          builtin.lexeme[2:], None, self.line))
             else:
                 self.add_token(TokenType.OPEN_BRACKETS)
-        elif c == '}':
-            self.add_token(TokenType.CLOSE_BRACKETS)
-        elif c == ',':
-            self.add_token(TokenType.COMMA)
         elif c == '/':
             if self.match('*'):
                 self.comment()
             else:
                 self.symbolic()
-        elif c == '-':
-            if self.peek().isnumeric() or self.peek() == '.':
-                self.number()
-            else:
-                self.symbolic()
-        elif c == '.':
-            if self.peek().isnumeric() or self.peek() == '.':
-                self.number()
-            else:
-                self.symbolic()
-        elif c.isspace():
-            return
+        elif c in ['-', '.'] or c.isnumeric():
+            self.unget()  # Treat this as a peek so .number() can handle it
+            self.number()
         elif c == '\n':
             self.line += 1
             return
+        elif c.isspace():
+            return
         elif c == '"':
             self.string()
-        elif c.isnumeric():
-            self.number()
         elif c.isalpha():
             self.identifier()
         else:
@@ -73,53 +82,25 @@ class Scanner():
             self.symbolic()
 
     def number(self):
-        c = self.source[self.current - 1]
-        if c == '-':
-            p = self.peek()
-            if p is None:
-                self.symbolic()
-                return
-            elif p in ' \r\t\n':
-                pass
-            elif p == '.' or p.isnumeric():  # -.5 is valid, -5 is, too.
-                self.advance()
-            else:
-                self.symbolic()  # -' is not
-                return
+        is_decimal = False
+        self.match('-')  # May match a starting -
+        self.match('.')  # May match .??? or -.???
 
-        c = self.source[self.current - 1]
-        if c == '.':
-            p = self.peek()
-            if p is None:  # -. and . aren't numbers
-                self.symbolic()
-                return
-            elif p in ' \r\t\n':
-                pass
-            elif p.isnumeric():
-                self.advance()
-            else:
-                self.symbolic()
-                return
-        if not self.source[self.current-1].isnumeric():
-            c = self.peek()
-            if c is None or c in ' \r\t\n':
-                pass
-            elif c == '.' or c.isnumeric():
-                pass
-            else:
-                self.symbolic()  # -.- is not a number
-                return
-
+        is_number = False
         while True:
             c = self.peek()
-            if c is None or c in ' \r\t\n':
+            if c is None:
                 break
-            if c.isnumeric():
+            elif c.isnumeric():
                 self.advance()
+                is_number = True
             elif c == '.':
                 self.advance()
             else:
                 break
+
+        if not is_number:
+            return self.symbolic()
 
         if "." in self.current_lexeme():
             self.add_token(TokenType.B10_FLOAT, float(self.current_lexeme()))
@@ -132,14 +113,8 @@ class Scanner():
             self.advance()
 
         lexeme = self.current_lexeme()
-        if lexeme == 'use':
-            self.add_token(TokenType.USE)
-        elif lexeme == 'let':
-            self.add_token(TokenType.LET)
-        elif lexeme == 'end':
-            self.add_token(TokenType.END)
-        elif lexeme == 'cond':
-            self.add_token(TokenType.COND)
+        if lexeme in self.reserved_words:
+            self.add_token(self.reserved_words[lexeme])
         else:
             self.match('!')  # Optional ending bang
             if lexeme[0].isupper():
@@ -155,14 +130,6 @@ class Scanner():
         if c in "'_":
             return True
         return False
-
-    reserved_symbols = {
-        "->": TokenType.RIGHT_ARROW,
-        "<-": TokenType.LEFT_ARROW,
-        "!": TokenType.BANG,
-        "|": TokenType.PIPE,
-        ":": TokenType.COLON
-    }
 
     def symbolic(self):
         while self.valid_as_symbolic(self.peek()):
@@ -180,7 +147,9 @@ class Scanner():
             return False
         elif c.isalnum():
             return False
-        elif c in "(){},":
+        elif c in self.unique_tokens:
+            return False
+        elif c == '{':  # The other special unique token not in the list
             return False
         else:
             return True
@@ -273,3 +242,6 @@ class Scanner():
             return False
         self.current += 1
         return True
+
+    def unget(self):
+        self.current -= 1

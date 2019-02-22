@@ -35,17 +35,24 @@ class TestScannerTokens(unittest.TestCase):
     }
 
     reserved = {
+        "use": TokenType.USE,
         "let": TokenType.LET,
-        "cond": TokenType.COND,
         "end": TokenType.END,
+        "cond": TokenType.COND,
         "<-": TokenType.LEFT_ARROW,
         "->": TokenType.RIGHT_ARROW,
         "|": TokenType.PIPE,
         ":": TokenType.COLON,
+        "!": TokenType.BANG,
         ";": TokenType.SEMICOLON,
+        "{": TokenType.OPEN_BRACKETS,
+        "}": TokenType.CLOSE_BRACKETS,
+        "(": TokenType.OPEN_PARENTHESES,
+        ")": TokenType.CLOSE_PARENTHESES,
+        ",": TokenType.COMMA,
     }
 
-    valid_symbols = ["-->", "<--", "?", "!!", "::", "||", "&&", "->>", "=*>>"]
+    valid_symbols = ["-->", "<--", "?", "!!", "::", "||", "&&", "->>", "=*>>", "-", "-.", ".", "..", "-..", "--"]
     
     def test_valid_integers(self):
         for string, literal in self.valid_integers.items():
@@ -94,8 +101,26 @@ class TestScannerTokens(unittest.TestCase):
                 self.assertEqual(len(tokens), 2)  # Parsed symbol, plus EOF
                 token = tokens[0]
                 self.assertIs(token.token_type, TokenType.SYMBOLIC)
-                
 
+    def test_single_line(self):
+        scanner_ = scanner.Scanner("foobar");
+        scanner_.scan_tokens()  # Discard
+        self.assertEqual(scanner_.line, 1)
+                
+    def test_two_lines(self):
+        scanner_ = scanner.Scanner("foo\nbar");
+        scanner_.scan_tokens()  # Discard
+        self.assertEqual(scanner_.line, 2)
+
+    def test_multiple_lines(self):
+        scanner_ = scanner.Scanner(r"""this is a "series of
+        tokens"
+        spread
+        among several
+        lines, also "includes an \n escaped linebreak character" that should be ignored""");
+        scanner_.scan_tokens()  # Discard
+        self.assertEqual(scanner_.line, 5)
+        
 if __name__ == "__main__":
     
     unittest.main()
