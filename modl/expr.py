@@ -1,8 +1,8 @@
-class TypedExpression():
+class TypedExpression:
     types = []
 
 
-class Use():
+class Use:
     def __init__(self, filename):
         self.filename = filename
 
@@ -10,7 +10,7 @@ class Use():
         return "USE " + repr(self.filename)
 
 
-class Let():
+class Let:
     def __init__(self, assignments):
         self.assignments = assignments
 
@@ -28,8 +28,9 @@ class Symchain(TypedExpression):
         self.right = right
 
     def __repr__(self):
-        return ("(" + repr(self.left) + ") " +
-                repr(self.op) + " (" + repr(self.right) + ")")
+        return (
+            "(" + repr(self.left) + ") " + repr(self.op) + " (" + repr(self.right) + ")"
+        )
 
 
 class Identifier(TypedExpression):
@@ -40,7 +41,7 @@ class Identifier(TypedExpression):
         return self.name
 
 
-class Typename():
+class Typename:
     def __init__(self, name):
         self.name = name
 
@@ -86,7 +87,7 @@ class Builtin(TypedExpression):
         self.name = name
 
     def __repr__(self):
-        return '#' + self.name
+        return "#" + self.name
 
 
 class Conditional(TypedExpression):
@@ -95,6 +96,7 @@ class Conditional(TypedExpression):
 
     def __repr__(self):
         result = "COND "
-        result += "\n| ".join(repr(cond) + " -> " + repr(body)
-                              for cond, body in self.cases)
+        result += "\n| ".join(
+            repr(cond) + " -> " + repr(body) for cond, body in self.cases
+        )
         return result

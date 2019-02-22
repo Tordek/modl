@@ -1,10 +1,11 @@
 from .tokens import Token, TokenType
 
 
-class Scanner():
+class Scanner:
     # These tokens may not appear as part of a longer token
     unique_tokens = {
         ";": TokenType.SEMICOLON,
+        "{": TokenType.OPEN_BRACKETS,
         "}": TokenType.CLOSE_BRACKETS,
         "(": TokenType.OPEN_PARENTHESES,
         ")": TokenType.CLOSE_PARENTHESES,
@@ -17,14 +18,14 @@ class Scanner():
         "<-": TokenType.LEFT_ARROW,
         "!": TokenType.BANG,
         "|": TokenType.PIPE,
-        ":": TokenType.COLON
+        ":": TokenType.COLON,
     }
 
     reserved_words = {
-        'use': TokenType.USE,
-        'let': TokenType.LET,
-        'end': TokenType.END,
-        'cond': TokenType.COND,
+        "use": TokenType.USE,
+        "let": TokenType.LET,
+        "end": TokenType.END,
+        "cond": TokenType.COND,
     }
 
     def __init__(self, source):
@@ -47,33 +48,21 @@ class Scanner():
         return self.current >= len(self.source)
 
     def scan_token(self):
-        c = self.advance()
-        if c in self.unique_tokens:
+        c = self.peek()
+        if self.match("{#"):
+            self.builtin()
+        elif self.match("/*"):
+            self.comment()
+        elif c in self.unique_tokens:
+            self.advance()
             self.add_token(self.unique_tokens[c])
-        elif c == '{':
-            # TODO: Cleanup
-            if self.match('#'):
-                self.identifier()
-                self.match('}')
-                builtin = self.tokens.pop()
-                self.tokens.append(Token(TokenType.BUILTIN,
-                                         builtin.lexeme[2:], None, self.line))
-            else:
-                self.add_token(TokenType.OPEN_BRACKETS)
-        elif c == '/':
-            if self.match('*'):
-                self.comment()
-            else:
-                self.symbolic()
-        elif c in ['-', '.'] or c.isnumeric():
-            self.unget()  # Treat this as a peek so .number() can handle it
+        elif c in ["-", "."] or c.isnumeric():
             self.number()
-        elif c == '\n':
+        elif self.match("\n"):
             self.line += 1
-            return
         elif c.isspace():
-            return
-        elif c == '"':
+            self.advance()
+        elif self.match('"'):
             self.string()
         elif c.isalpha():
             self.identifier()
@@ -81,10 +70,17 @@ class Scanner():
             # All other characters count as symbols
             self.symbolic()
 
+    def builtin(self):
+        while self.valid_in_identifier(self.peek()):
+            self.advance()
+        if not self.match("}"):
+            raise Exception(self.line, "Unterminated builtin literal")
+        self.add_token(TokenType.BUILTIN, self.current_lexeme()[2:-1])
+
     def number(self):
         is_decimal = False
-        self.match('-')  # May match a starting -
-        self.match('.')  # May match .??? or -.???
+        self.match("-")  # May match a starting -
+        self.match(".")  # May match .??? or -.???
 
         is_number = False
         while True:
@@ -94,7 +90,7 @@ class Scanner():
             elif c.isnumeric():
                 self.advance()
                 is_number = True
-            elif c == '.':
+            elif c == ".":
                 self.advance()
             else:
                 break
@@ -105,8 +101,7 @@ class Scanner():
         if "." in self.current_lexeme():
             self.add_token(TokenType.B10_FLOAT, float(self.current_lexeme()))
         else:
-            self.add_token(TokenType.B10_INTEGER,
-                           int(self.current_lexeme(), 10))
+            self.add_token(TokenType.B10_INTEGER, int(self.current_lexeme(), 10))
 
     def identifier(self):
         while self.valid_in_identifier(self.peek()):
@@ -116,7 +111,7 @@ class Scanner():
         if lexeme in self.reserved_words:
             self.add_token(self.reserved_words[lexeme])
         else:
-            self.match('!')  # Optional ending bang
+            self.match("!")  # Optional ending bang
             if lexeme[0].isupper():
                 self.add_token(TokenType.TYPENAME)
             else:
@@ -135,7 +130,9 @@ class Scanner():
         while self.valid_as_symbolic(self.peek()):
             self.advance()
         lexeme = self.current_lexeme()
-        if lexeme in self.reserved_symbols:
+        if lexeme == "*/":
+            raise Exception(self.line, "Unopened comment.")
+        elif lexeme in self.reserved_symbols:
             self.add_token(self.reserved_symbols[lexeme])
         else:
             self.add_token(TokenType.SYMBOLIC)
@@ -149,8 +146,6 @@ class Scanner():
             return False
         elif c in self.unique_tokens:
             return False
-        elif c == '{':  # The other special unique token not in the list
-            return False
         else:
             return True
 
@@ -158,10 +153,10 @@ class Scanner():
         literal = ""
         while self.peek() != '"' and not self.is_at_end():
             c = self.peek()  # Sure would like to have the walrus op
-            if c == '\n':
+            if c == "\n":
                 self.line += 1
 
-            if c == '\\':  # Escape characters
+            if c == "\\":  # Escape characters
                 self.advance()
                 if self.is_at_end():
                     break
@@ -174,25 +169,23 @@ class Scanner():
                     literal += "\t"
                 elif e == "\\":
                     literal += "\\"
-                elif e == "\"":
-                    literal += "\""
+                elif e == '"':
+                    literal += '"'
                 elif e == "x":
                     # fetch 4 characters as hex and decode as unicode
-                    codepoint = self.source[self.current+1:self.current+5]
+                    codepoint = self.source[self.current + 1 : self.current + 5]
                     if len(codepoint) < 4:
                         raise Exception(self.line, "Unterminated string")
                     literal += chr(int(codepoint, 16))
                     self.current += 4
                 else:
-                    raise Exception(self.line,
-                                    "\\" + e + " is not an escape sequence")
+                    raise Exception(self.line, "\\" + e + " is not an escape sequence")
             else:
                 literal += c
             self.advance()
 
         if self.is_at_end():
             raise Exception(self.line, "Unterminated string")
-            return
 
         self.advance()  # Closing "
 
@@ -200,11 +193,9 @@ class Scanner():
 
     def comment(self):
         while not self.is_at_end():
-            if self.peek() == '\n':
+            if self.peek() == "\n":
                 self.line += 1
-            elif self.peek() == '*' and self.peeknext() == '/':
-                self.advance()
-                self.advance()
+            elif self.match("*/"):
                 break
             self.advance()
 
@@ -215,33 +206,23 @@ class Scanner():
 
     def advance(self):
         self.current += 1
-        return self.source[self.current-1]
+        return self.source[self.current - 1]
 
-    def peek(self):
-        if self.is_at_end():
+    def peek(self, n=1):
+        if self.current + n > len(self.source):
             return None
-        return self.source[self.current]
-
-    def peeknext(self):
-        if self.current + 1 >= len(self.source):
-            return None
-        return self.source[self.current+1]
+        return self.source[self.current : self.current + n]
 
     def current_lexeme(self):
-        return self.source[self.start:self.current]
+        return self.source[self.start : self.current]
 
     def add_token(self, token_type, literal=None):
-        self.tokens.append(
-            Token(token_type, self.current_lexeme(), literal, self.line)
-        )
+        self.tokens.append(Token(token_type, self.current_lexeme(), literal, self.line))
 
     def match(self, c):
         if self.is_at_end():
             return False
-        if self.source[self.current] != c:
+        if self.peek(len(c)) != c:
             return False
-        self.current += 1
+        self.current += len(c)
         return True
-
-    def unget(self):
-        self.current -= 1

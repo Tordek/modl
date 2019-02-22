@@ -41,7 +41,7 @@ class TokenType(enum.Enum):
     pass
 
 
-class Token():
+class Token:
     def __init__(self, token_type, lexeme, literal, line):
         self.token_type = token_type
         self.lexeme = lexeme
@@ -52,5 +52,4 @@ class Token():
         if self.literal:
             return "{} '{}'".format(self.token_type, self.lexeme)
         else:
-            return "{} '{}' {}".format(self.token_type, self.lexeme,
-                                       self.literal)
+            return "{} '{}' {}".format(self.token_type, self.lexeme, self.literal)

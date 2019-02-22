@@ -1,6 +1,8 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+
+sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("."))
 import unittest
 from modl import scanner
 from modl.tokens import TokenType
@@ -18,20 +20,15 @@ class TestScannerTokens(unittest.TestCase):
         "-000123": -123,
     }
 
-    valid_floats = {
-        "0.0": 0.0,
-        "0.1": 0.1,
-        "1.0": 1.0,
-        ".5": 0.5,
-        "-.5": -0.5,
-    }
-    
+    valid_floats = {"0.0": 0.0, "0.1": 0.1, "1.0": 1.0, ".5": 0.5, "-.5": -0.5}
+
     valid_strings = {
         r'""': "",
         r'"a"': "a",
         r'"this is a long string"': "this is a long string",
         '"this string\nis multiline"': "this string\nis multiline",
         r'"this string\nis also multiline"': "this string\nis also multiline",
+        r'"A whole bunch of escape sequences \r\n\t\\\"\x0123"': 'A whole bunch of escape sequences \r\n\t\\"\u0123',
     }
 
     reserved = {
@@ -52,8 +49,29 @@ class TestScannerTokens(unittest.TestCase):
         ",": TokenType.COMMA,
     }
 
-    valid_symbols = ["-->", "<--", "?", "!!", "::", "||", "&&", "->>", "=*>>", "-", "-.", ".", "..", "-..", "--"]
-    
+    valid_symbols = [
+        "-->",
+        "<--",
+        "?",
+        "!!",
+        "::",
+        "||",
+        "&&",
+        "->>",
+        "=*>>",
+        "-",
+        "-.",
+        ".",
+        "..",
+        "-..",
+        "--",
+        "/",
+        "//",
+        "' ",
+    ]
+    valid_identifiers = ["foo", "bar_baz", "quux'", "read!"]
+    invalid_symbols = ["-{", "/a", "-)"]
+
     def test_valid_integers(self):
         for string, literal in self.valid_integers.items():
             with self.subTest(i=string):
@@ -73,7 +91,7 @@ class TestScannerTokens(unittest.TestCase):
                 token = tokens[0]
                 self.assertIs(token.token_type, TokenType.B10_FLOAT)
                 self.assertEqual(token.literal, literal)
-                
+
     def test_valid_strings(self):
         for string, literal in self.valid_strings.items():
             with self.subTest(i=string):
@@ -102,25 +120,98 @@ class TestScannerTokens(unittest.TestCase):
                 token = tokens[0]
                 self.assertIs(token.token_type, TokenType.SYMBOLIC)
 
+    def test_invalid_symbol(self):
+        for string in self.invalid_symbols:
+            with self.subTest(i=string):
+                scanner_ = scanner.Scanner(string)
+                tokens = scanner_.scan_tokens()
+                # Whatever this matched is OK as long as it's not a single symbol
+                self.assertNotEqual(len(tokens), 2)
+
+    def test_valid_identifier(self):
+        for string in self.valid_identifiers:
+            with self.subTest(i=string):
+                scanner_ = scanner.Scanner(string)
+                tokens = scanner_.scan_tokens()
+                self.assertEqual(len(tokens), 2)  # Parsed symbol, plus EOF
+                token = tokens[0]
+                self.assertIs(token.token_type, TokenType.IDENTIFIER)
+
     def test_single_line(self):
-        scanner_ = scanner.Scanner("foobar");
+        scanner_ = scanner.Scanner("foobar")
         scanner_.scan_tokens()  # Discard
         self.assertEqual(scanner_.line, 1)
-                
+
     def test_two_lines(self):
-        scanner_ = scanner.Scanner("foo\nbar");
+        scanner_ = scanner.Scanner("foo\nbar")
         scanner_.scan_tokens()  # Discard
         self.assertEqual(scanner_.line, 2)
 
     def test_multiple_lines(self):
-        scanner_ = scanner.Scanner(r"""this is a "series of
+        scanner_ = scanner.Scanner(
+            r"""this is a "series of
         tokens"
+        /* including multiline comments
         spread
-        among several
-        lines, also "includes an \n escaped linebreak character" that should be ignored""");
+        among several */
+        lines, also "includes an \n escaped linebreak character" that should be ignored"""
+        )
         scanner_.scan_tokens()  # Discard
-        self.assertEqual(scanner_.line, 5)
-        
+        self.assertEqual(scanner_.line, 6)
+
+    def test_builtin(self):
+        scanner_ = scanner.Scanner("{#builtin_name}")
+        tokens = scanner_.scan_tokens()
+        self.assertEqual(len(tokens), 2)  # Parsed symbol, plus EOF
+        token = tokens[0]
+        self.assertIs(token.token_type, TokenType.BUILTIN)
+        self.assertEqual(token.literal, "builtin_name")
+
+    def test_typename(self):
+        scanner_ = scanner.Scanner("Type")
+        tokens = scanner_.scan_tokens()
+        self.assertEqual(len(tokens), 2)  # Parsed symbol, plus EOF
+        token = tokens[0]
+        self.assertIs(token.token_type, TokenType.TYPENAME)
+        self.assertEqual(token.lexeme, "Type")
+
+
+class InvalidTokensTest(unittest.TestCase):
+    def test_unclosed_comment(self):
+        scanner_ = scanner.Scanner("/* unclosed comment")
+        with self.assertRaises(Exception):
+            scanner_.scan_tokens()
+
+    def test_unopened_comment(self):
+        scanner_ = scanner.Scanner("forgot to remove uncomment */")
+        with self.assertRaises(Exception):
+            scanner_.scan_tokens()
+
+    def test_unclosed_string(self):
+        scanner_ = scanner.Scanner('"a string with no close')
+        with self.assertRaises(Exception):
+            scanner_.scan_tokens()
+
+    def test_incomplete_string_escape(self):
+        scanner_ = scanner.Scanner('"unclosed escape\\')
+        with self.assertRaises(Exception):
+            scanner_.scan_tokens()
+
+    def test_invalid_escape_sequence(self):
+        scanner_ = scanner.Scanner('"invalid escape \q code"')
+        with self.assertRaises(Exception):
+            scanner_.scan_tokens()
+
+    def test_invalid_unicode_escape_sequence(self):
+        scanner_ = scanner.Scanner(r'"invalid escape \x15')
+        with self.assertRaises(Exception):
+            scanner_.scan_tokens()
+
+    def test_unclosed_builtin(self):
+        scanner_ = scanner.Scanner(r'{#broken_builtin')
+        with self.assertRaises(Exception):
+            scanner_.scan_tokens()
+
 if __name__ == "__main__":
-    
+
     unittest.main()
