@@ -64,6 +64,8 @@ class Scanner:
             self.advance()
         elif self.match('"'):
             self.string()
+        elif c.isupper():
+            self.typename()
         elif c.isalpha():
             self.identifier()
         else:
@@ -78,7 +80,6 @@ class Scanner:
         self.add_token(TokenType.BUILTIN, self.current_lexeme()[2:-1])
 
     def number(self):
-        is_decimal = False
         self.match("-")  # May match a starting -
         self.match(".")  # May match .??? or -.???
 
@@ -103,19 +104,24 @@ class Scanner:
         else:
             self.add_token(TokenType.B10_INTEGER, int(self.current_lexeme(), 10))
 
+    def typename(self):
+        while self.valid_in_identifier(self.peek()):
+            self.advance()
+
+        self.add_token(TokenType.TYPENAME)
+
     def identifier(self):
         while self.valid_in_identifier(self.peek()):
             self.advance()
 
         lexeme = self.current_lexeme()
         if lexeme in self.reserved_words:
+            if self.match("!"):
+                raise Exception("Can't use bangs after reserved words.")
             self.add_token(self.reserved_words[lexeme])
         else:
-            self.match("!")  # Optional ending bang
-            if lexeme[0].isupper():
-                self.add_token(TokenType.TYPENAME)
-            else:
-                self.add_token(TokenType.IDENTIFIER)
+            self.match("!")
+            self.add_token(TokenType.IDENTIFIER)
 
     def valid_in_identifier(self, c):
         if c is None:
@@ -192,15 +198,13 @@ class Scanner:
         self.add_token(TokenType.STRING, literal)
 
     def comment(self):
-        while not self.is_at_end():
-            if self.peek() == "\n":
-                self.line += 1
-            elif self.match("*/"):
-                break
-            self.advance()
-
+        while not self.match("*/"):
             if self.is_at_end():
                 raise Exception(self.line, "Unterminated comment")
+            if self.peek() == "\n":
+                self.line += 1
+            self.advance()
+
 
         # self.add_token(TokenType.COMMENT, self.current_lexeme())
 

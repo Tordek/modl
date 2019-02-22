@@ -69,7 +69,9 @@ class TestScannerTokens(unittest.TestCase):
         "//",
         "' ",
     ]
-    valid_identifiers = ["foo", "bar_baz", "quux'", "read!"]
+    valid_identifiers = ["foo", "bar_baz", "quux'", "read!", "add4", "plus5!"]
+
+    # Sequences containing unique characters that may not be part of a symbol
     invalid_symbols = ["-{", "/a", "-)"]
 
     def test_valid_integers(self):
@@ -209,6 +211,11 @@ class InvalidTokensTest(unittest.TestCase):
 
     def test_unclosed_builtin(self):
         scanner = Scanner(r"{#broken_builtin")
+        with self.assertRaises(Exception):
+            scanner.scan_tokens()
+
+    def test_bang_after_keyword(self):
+        scanner = Scanner(r"let!")
         with self.assertRaises(Exception):
             scanner.scan_tokens()
 
