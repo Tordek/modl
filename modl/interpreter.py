@@ -1,7 +1,7 @@
 import collections
-import .expr
-import .parser
-import .scanner
+from . import expr as expr
+from .parser import Parser
+from .scanner import Scanner
 
 BUILTIN = {
     'print': lambda x: print(x),
@@ -41,8 +41,8 @@ class Interpreter():
         elif isinstance(statement, expr.Use):
             with open(statement.filename) as file:
                 contents = file.read()
-                scanner = scanner.Scanner(contents)
-                parser = parser.Parser(scanner.scan_tokens())
+                scanner = Scanner(contents)
+                parser = Parser(scanner.scan_tokens())
                 for statement in parser.program():
                     result, environment = self.interpret(statement,
                                                          environment)

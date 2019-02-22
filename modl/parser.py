@@ -1,4 +1,4 @@
-import expr
+from . import expr
 from .tokens import Token, TokenType
 
 
