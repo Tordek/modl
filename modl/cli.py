@@ -57,8 +57,7 @@ def error(line, message):
 
 def report(line, where, message):
     global hadError
-    print("[line {}] Error{}: {}".format(line, where, message),
-          file=sys.stderr)
+    print("[line {}] Error{}: {}".format(line, where, message), file=sys.stderr)
     hadError = True
 
 

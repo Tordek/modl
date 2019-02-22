@@ -4,23 +4,23 @@ from .parser import Parser
 from .scanner import Scanner
 
 BUILTIN = {
-    'print': lambda x: print(x),
-    'add': lambda x, y: x + y,
-    'sub': lambda x, y: x - y,
-    'read': lambda _: input(),
-    'eq': lambda x, y: x == y,
-    'gt': lambda x, y: x > y,
-    'if': lambda c, t, f: t if c else f,
+    "print": lambda x: print(x),
+    "add": lambda x, y: x + y,
+    "sub": lambda x, y: x - y,
+    "read": lambda _: input(),
+    "eq": lambda x, y: x == y,
+    "gt": lambda x, y: x > y,
+    "if": lambda c, t, f: t if c else f,
 }
 
 
-class Function():
+class Function:
     def __init__(self, function, environment):
         self.function = function
         self.environment = environment
 
 
-class Interpreter():
+class Interpreter:
     def interpret(self, statement, environment):
         if isinstance(statement, expr.Literal):
             return (statement.value, environment)
@@ -44,8 +44,7 @@ class Interpreter():
                 scanner = Scanner(contents)
                 parser = Parser(scanner.scan_tokens())
                 for statement in parser.program():
-                    result, environment = self.interpret(statement,
-                                                         environment)
+                    result, environment = self.interpret(statement, environment)
                 return (result, environment)
         elif isinstance(statement, expr.Let):
             env = environment.new_child()
@@ -86,9 +85,12 @@ class Interpreter():
             for name, value in zip(args, params):
                 f_env[name.name] = value
             if len(args) > len(params):
-                return (Function(expr.Function(args[len(params):],
-                                               f.function.body), f_env),
-                        environment)
+                return (
+                    Function(
+                        expr.Function(args[len(params) :], f.function.body), f_env
+                    ),
+                    environment,
+                )
             else:
                 v = None
                 for statement in f.function.body:
