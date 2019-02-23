@@ -33,7 +33,7 @@ class Interpreter:
         elif isinstance(statement, expr.Identifier):
             return (environment[statement.name], environment)
         elif isinstance(statement, expr.Grouping):
-            return interpret(statement.expression, environment)
+            return self.interpret(statement.expression, environment)
         elif isinstance(statement, expr.Function):
             return (Function(statement, environment), environment)
         elif isinstance(statement, expr.Builtin):
@@ -44,45 +44,45 @@ class Interpreter:
                 scanner = Scanner(contents)
                 parser = Parser(scanner.scan_tokens())
                 for statement in parser.program():
-                    result, environment = interpret(statement, environment)
+                    result, environment = self.interpret(statement, environment)
                 return (result, environment)
         elif isinstance(statement, expr.Let):
             environment = environment.new_child()
             for (name, value) in statement.assignments:
-                (evaluated_value, _) = interpret(value, environment)
+                (evaluated_value, _) = self.interpret(value, environment)
                 environment[name.name] = evaluated_value
             return (None, environment)
         elif isinstance(statement, expr.Expression):
             results = []
             for s in statement.call:
-                result, _ = interpret(s, environment)
+                result, _ = self.interpret(s, environment)
                 results.append(result)
             if is_tail_call:
                 return TailCall(results[0], results[1:])
             else:
-                return (do_call(*results), environment)
+                return (self.do_call(*results), environment)
         elif isinstance(statement, expr.Symchain):
-            (left, _) = interpret(statement.left, environment)
-            (op, _) = interpret(statement.op, environment)
-            (right, _) = interpret(statement.right, environment)
+            (left, _) = self.interpret(statement.left, environment)
+            (op, _) = self.interpret(statement.op, environment)
+            (right, _) = self.interpret(statement.right, environment)
             if is_tail_call:
                 return TailCall(op, [left, right])
             else:
-                return (do_call(op, left, right), environment)
+                return (self.do_call(op, left, right), environment)
         elif isinstance(statement, expr.Conditional):
             # Discard the environment from the evaluation
             # to disallow `let`s done inside a case
             for condition, body in statement.cases:
-                value, _ = interpret(condition, environment)
+                value, _ = self.interpret(condition, environment)
                 if value is True:
                     env = environment
                     if is_tail_call:
                         for st in body[:-1]:
-                            result, env = interpret(st, env)
-                        return interpret(body[-1], env, True)
+                            result, env = self.interpret(st, env)
+                        return self.interpret(body[-1], env, True)
                     else:
                         for st in body:
-                            result, env = interpret(st, env)
+                            result, env = self.interpret(st, env)
                         return result, environment
                 elif value is False:
                     continue
@@ -91,7 +91,7 @@ class Interpreter:
         else:
             raise Exception("Trying to run unknown thing", statement)
 
-    def do_call(f, *params):
+    def do_call(self, f, *params):
         while True:
             # Currying, but optimized if there are multiple parameters
             if isinstance(f, Function):
@@ -106,8 +106,8 @@ class Interpreter:
                 else:
                     v = None
                     for statement in f.function.body[:-1]:
-                        (v, f_env) = interpret(statement, f_env)
-                    result = interpret(f.function.body[-1], f_env, True)
+                        (v, f_env) = self.interpret(statement, f_env)
+                    result = self.interpret(f.function.body[-1], f_env, True)
                     if isinstance(result, TailCall):
                         f = result.f
                         params = result.params
