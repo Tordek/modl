@@ -4,7 +4,7 @@ import traceback
 
 from .parser import Parser
 from .scanner import Scanner
-from .interpreter import Interpreter
+from . import interpreter
 from collections import ChainMap
 
 
@@ -23,7 +23,6 @@ def run_file(path):
         env = ChainMap()
         env["!"] = "!"
         env["otherwise"] = True
-        interpreter = Interpreter()
 
         scanner = Scanner(command)
         parser = Parser(scanner.scan_tokens())
@@ -43,7 +42,6 @@ def run_prompt():
             command = input("> ")
             scanner = Scanner(command)
             parser = Parser(scanner.scan_tokens())
-            interpreter = Interpreter()
             (result, env) = interpreter.interpret(parser.statement(), env)
             print(result)
             hadError = False
