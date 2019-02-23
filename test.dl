@@ -43,3 +43,6 @@ let odd <- { x |
         | otherwise -> odd (x - 1);
         end;
     };
+
+/* As useful as expected, but proves TCE works. */
+let loop_forever! <- { ! | loop_forever!; };

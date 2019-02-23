@@ -74,7 +74,11 @@ class Parser:
         # the first in the call
         if isinstance(head, expr.Identifier) and head.name[-1] == "!":
             chain = [chain[0], expr.Identifier("!")] + chain[1:]
-        return expr.Expression(chain)
+
+        if len(chain) == 1:
+            return chain[0]
+        else:
+            return expr.Expression(chain)
 
     def primary(self):
         result = self.try_primary()
