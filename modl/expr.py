@@ -15,10 +15,7 @@ class Let:
         self.assignments = assignments
 
     def __repr__(self):
-        result = "LET "
-        for name, value in assignments:
-            result += repr(name) + " <- " + repr(value) + ", "
-        return result
+        return "(DEFINE " + '\n        '.join(repr(name) + " " + repr(value) for (name, value) in self.assignments) + ")"
 
 
 class Symchain(TypedExpression):
@@ -28,9 +25,7 @@ class Symchain(TypedExpression):
         self.right = right
 
     def __repr__(self):
-        return (
-            "(" + repr(self.left) + ") " + repr(self.op) + " (" + repr(self.right) + ")"
-        )
+        return "(" + repr(self.op) + " " + repr(self.left) + " " + repr(self.right) + ")"
 
 
 class Identifier(TypedExpression):
@@ -54,7 +49,7 @@ class Expression(TypedExpression):
         self.call = call
 
     def __repr__(self):
-        return repr(self.call)
+        return "(" + " ".join(repr(v) for v in self.call) + ")"
 
 
 class Function(TypedExpression):
@@ -63,7 +58,7 @@ class Function(TypedExpression):
         self.body = body
 
     def __repr__(self):
-        return "Function {} of {} arguments".format(id(self), len(self.args))
+        return "(LAMBDA (" + ' '.join(repr(arg) for arg in self.args) + ") " + ' '.join(repr(st) for st in self.body) + ")"
 
 
 class Literal(TypedExpression):
@@ -87,8 +82,19 @@ class Conditional(TypedExpression):
         self.cases = cases
 
     def __repr__(self):
-        result = "COND "
-        result += "\n| ".join(
-            repr(cond) + " -> " + repr(body) for cond, body in self.cases
-        )
+        result = "(COND "
+        for cond, body in self.cases:
+            result += "("
+            result += repr(cond)
+            if len(body) == 1:
+                result += " "
+                result += repr(body[0])
+            else:
+                result += "(progn"
+                for st in body:
+                    result += "\n"
+                    result += repr(st)
+                result += ")"
+            result += ") "
+        result += ")"
         return result
