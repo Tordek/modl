@@ -46,3 +46,9 @@ let >= <- { x y |
 };
 let < <- { x y | not (x >= y); };
 let <= <- { x y | not (x > y); };
+
+/* Bang! helpers */
+let forever! <- { ! command! |
+    command!;
+    forever! command!;
+}; 

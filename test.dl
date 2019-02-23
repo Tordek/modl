@@ -47,7 +47,4 @@ let odd <- { x |
 /* As useful as expected, but proves TCE works. */
 let loop_forever! <- { ! | loop_forever!; };
 
-let hello! <- { ! |
-    print! "Hello, World!";
-    hello!;
-};
+let hello! <- { ! | forever! { ! | print! "Hello!"; }; };
