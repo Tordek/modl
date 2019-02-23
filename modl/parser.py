@@ -125,7 +125,7 @@ class Parser:
         elif self.match(TokenType.OPEN_PARENTHESES):
             e = self.symchain()
             self.consume("Missing closing parentheses", TokenType.CLOSE_PARENTHESES)
-            return expr.Grouping(e)
+            return e
         elif self.match(TokenType.COND):
             cases = []
             while True:

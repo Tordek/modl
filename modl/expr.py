@@ -57,14 +57,6 @@ class Expression(TypedExpression):
         return repr(self.call)
 
 
-class Grouping(TypedExpression):
-    def __init__(self, expression):
-        self.expression = expression
-
-    def __repr__(self):
-        return "(" + repr(self.expression) + ")"
-
-
 class Function(TypedExpression):
     def __init__(self, args, body):
         self.args = args

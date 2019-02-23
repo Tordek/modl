@@ -31,8 +31,6 @@ def interpret(statement, environment, is_tail_call=False):
         return (statement.value, environment)
     elif isinstance(statement, expr.Identifier):
         return (environment[statement.name], environment)
-    elif isinstance(statement, expr.Grouping):
-        return interpret(statement.expression, environment)
     elif isinstance(statement, expr.Function):
         return (Function(statement, environment), environment)
     elif isinstance(statement, expr.Builtin):
