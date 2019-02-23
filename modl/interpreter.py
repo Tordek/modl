@@ -27,7 +27,7 @@ class TailCall:
 
 
 class Interpreter:
-    def interpret(statement, environment, is_tail_call=False):
+    def interpret(self, statement, environment, is_tail_call=False):
         if isinstance(statement, expr.Literal):
             return (statement.value, environment)
         elif isinstance(statement, expr.Identifier):
