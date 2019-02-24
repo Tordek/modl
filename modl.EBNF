@@ -21,10 +21,11 @@ primary = ( function
           | NUMBER
           | IDENTIFIER
           | BUILTIN
+          | OPEN_PARENTHESES SYMBOLIC CLOSE_PARENTHESES
           | OPEN_PARENTHESES symchain CLOSE_PARENTHESES
           ) (COLON type_signature)?)
         ;
 
 cond = COND (PIPE symchain LEFT_ARROW statement+)+ END ;
 
-function = OPEN_BRACE (BANG | identifier) identifier* PIPE statement* CLOSE_BRACE ;
+function = OPEN_BRACE (BANG | identifier) identifier* PIPE statement+ CLOSE_BRACE ;

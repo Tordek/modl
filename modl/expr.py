@@ -15,7 +15,13 @@ class Let:
         self.assignments = assignments
 
     def __repr__(self):
-        return "(DEFINE " + '\n        '.join(repr(name) + " " + repr(value) for (name, value) in self.assignments) + ")"
+        return (
+            "(DEFINE "
+            + "\n        ".join(
+                repr(name) + " " + repr(value) for (name, value) in self.assignments
+            )
+            + ")"
+        )
 
 
 class Symchain(TypedExpression):
@@ -25,18 +31,12 @@ class Symchain(TypedExpression):
         self.right = right
 
     def __repr__(self):
-        return "(" + repr(self.op) + " " + repr(self.left) + " " + repr(self.right) + ")"
+        return (
+            "(" + repr(self.op) + " " + repr(self.left) + " " + repr(self.right) + ")"
+        )
 
 
 class Identifier(TypedExpression):
-    def __init__(self, name):
-        self.name = name
-
-    def __repr__(self):
-        return self.name
-
-
-class Typename:
     def __init__(self, name):
         self.name = name
 
@@ -58,7 +58,13 @@ class Function(TypedExpression):
         self.body = body
 
     def __repr__(self):
-        return "(LAMBDA (" + ' '.join(repr(arg) for arg in self.args) + ") " + ' '.join(repr(st) for st in self.body) + ")"
+        return (
+            "(LAMBDA ("
+            + " ".join(repr(arg) for arg in self.args)
+            + ") "
+            + " ".join(repr(st) for st in self.body)
+            + ")"
+        )
 
 
 class Literal(TypedExpression):

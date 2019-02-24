@@ -53,20 +53,13 @@ class Parser:
 
         return e
 
-    def identifier(self):
-        identifier = self.consume("Expected an identifier", TokenType.IDENTIFIER)
-        return expr.Identifier(identifier.lexeme)
-
     def expression(self):
         chain = []
 
         while True:
             e = self.try_primary()
             if e is None:
-                if self.match(TokenType.BANG):
-                    e = expr.Identifier(self.previous().lexeme)
-                else:
-                    break
+                break
             chain.append(e)
 
         head = chain[0]
@@ -80,12 +73,6 @@ class Parser:
         else:
             return expr.Expression(chain)
 
-    def primary(self):
-        result = self.try_primary()
-        if result is None:
-            raise Exception(self.peek(), "Unknown symbol")
-        return result
-
     def try_primary(self):
         value = self.try_primary_()
         types = []
@@ -97,7 +84,7 @@ class Parser:
                 t = self.consume("Expected a type after ->", TokenType.TYPENAME)
                 types.append(t.lexeme)
         if value:
-            value.signature = types
+            value.types = types
         return value
 
     def try_primary_(self):
@@ -110,7 +97,7 @@ class Parser:
             while self.match(TokenType.IDENTIFIER):
                 argument_list.append(expr.Identifier(self.previous().lexeme))
             self.consume("Missing argument delimiter", TokenType.PIPE)
-            body = []
+            body = [self.statement()]
             while not self.check(TokenType.CLOSE_BRACKETS):
                 e = self.statement()
                 body.append(e)
@@ -123,6 +110,14 @@ class Parser:
         elif self.match(TokenType.BUILTIN):
             return expr.Builtin(self.previous().literal)
         elif self.match(TokenType.OPEN_PARENTHESES):
+            if self.check(TokenType.SYMBOLIC):
+                symbol = self.match(TokenType.SYMBOLIC)
+                identifier = expr.Identifier(self.previous().lexeme)
+                self.consume(
+                    "Symbol expressions can only contain a symbol",
+                    TokenType.CLOSE_PARENTHESES,
+                )
+                return identifier
             e = self.symchain()
             self.consume("Missing closing parentheses", TokenType.CLOSE_PARENTHESES)
             return e
@@ -133,10 +128,8 @@ class Parser:
                 condition = self.symchain()
                 self.consume("Missing condition delimiter", TokenType.RIGHT_ARROW)
 
-                body = []
-                while True:
-                    if self.check(TokenType.PIPE, TokenType.END):
-                        break
+                body = [self.statement()]
+                while not self.check(TokenType.PIPE, TokenType.END):
                     body.append(self.statement())
                 cases.append((condition, body))
 
