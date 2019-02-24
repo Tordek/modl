@@ -57,4 +57,4 @@ class InterpretAllTheThings(unittest.TestCase):
         parser = Parser(scanner.scan_tokens())
         for statement in parser.program():
             result, env = interpreter.interpret(statement, env)
-        self.assertTrue(False)
+        self.assertEqual(result, 8)
