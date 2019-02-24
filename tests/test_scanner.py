@@ -197,7 +197,7 @@ class InvalidTokensTest(unittest.TestCase):
             scanner.scan_tokens()
 
     def test_invalid_escape_sequence(self):
-        scanner = Scanner('"invalid escape \q code"')
+        scanner = Scanner(r'"invalid escape \q code"')
         with self.assertRaises(Exception):
             scanner.scan_tokens()
 
@@ -217,6 +217,13 @@ class InvalidTokensTest(unittest.TestCase):
             scanner.scan_tokens()
 
 
-if __name__ == "__main__":
+class ExprTest(unittest.TestCase):
+    def test_literal_expression(self):
+        scanner = Scanner("{#builtin_name}")
+        tokens = scanner.scan_tokens()
+        self.assertEqual(repr(tokens[0]), "TokenType.BUILTIN '{#builtin_name}'")
 
-    unittest.main()
+    def test_other_expression(self):
+        scanner = Scanner("+")
+        tokens = scanner.scan_tokens()
+        self.assertEqual(repr(tokens[0]), "TokenType.SYMBOLIC '+' None")
