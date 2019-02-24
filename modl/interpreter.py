@@ -85,6 +85,7 @@ def interpret(statement, environment, is_tail_call=False):
                 continue
             else:
                 raise Exception("Type mismatch, condition must be boolean", value)
+        return (None, environment)  # All conditions were false
     else:
         raise Exception("Trying to run unknown thing", statement)
 

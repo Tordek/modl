@@ -21,6 +21,18 @@ let fib <- { a b x |
 /* Currying is available */
 let flatfibo <- fib 1 1;
 
+let tracefibo <- { a b x |
+  cond
+  | x == 0 -> print! "exiting";
+  end;
+  cond
+  | x == 0 -> a;
+  | otherwise ->
+    print! "going deeper";
+    tracefibo b (a + b) (x - 1);
+  end;
+};
+
 /* Test for scope */
 let a <- "outer";
 let f! <- { ! |

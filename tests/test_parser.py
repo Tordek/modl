@@ -13,21 +13,21 @@ class PrimaryTests(unittest.TestCase):
                 scanner = Scanner(string)
                 parser = Parser(scanner.scan_tokens())
                 statement = parser.statement()
-                self.assertTrue(isinstance(statement, expr.Literal))
+                self.assertIsInstance(statement, expr.Literal)
                 self.assertEqual(statement.value, literal)
 
     def test_builtin(self):
         scanner = Scanner("{#print};")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Builtin))
+        self.assertIsInstance(statement, expr.Builtin)
         self.assertEqual(statement.name, "print")
 
     def test_identifier(self):
         scanner = Scanner("ident;")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Identifier))
+        self.assertIsInstance(statement, expr.Identifier)
         self.assertEqual(statement.name, "ident")
 
     def test_symbols_cant_be_used_alone(self):
@@ -40,33 +40,33 @@ class PrimaryTests(unittest.TestCase):
         scanner = Scanner("(+);")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Identifier))
+        self.assertIsInstance(statement, expr.Identifier)
         self.assertEqual(statement.name, "+")
 
     def test_symbols_can_be_part_of_an_expression(self):
         scanner = Scanner("1 + 2;")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Symchain))
-        self.assertTrue(isinstance(statement.op, expr.Identifier))
+        self.assertIsInstance(statement, expr.Symchain)
+        self.assertIsInstance(statement.op, expr.Identifier)
         self.assertEqual(statement.op.name, "+")
-        self.assertTrue(isinstance(statement.left, expr.Literal))
+        self.assertIsInstance(statement.left, expr.Literal)
         self.assertEqual(statement.left.value, 1)
-        self.assertTrue(isinstance(statement.right, expr.Literal))
+        self.assertIsInstance(statement.right, expr.Literal)
         self.assertEqual(statement.right.value, 2)
 
     def test_parentheses_are_invisible(self):
         scanner = Scanner("(ident);")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Identifier))
+        self.assertIsInstance(statement, expr.Identifier)
         self.assertEqual(statement.name, "ident")
 
     def test_lambda(self):
         scanner = Scanner("{ x | x; };")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Function))
+        self.assertIsInstance(statement, expr.Function)
         self.assertEqual(len(statement.args), 1)
         self.assertEqual(len(statement.body), 1)
 
@@ -74,7 +74,7 @@ class PrimaryTests(unittest.TestCase):
         scanner = Scanner("{ x y | x y; y x; x y;};")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Function))
+        self.assertIsInstance(statement, expr.Function)
         self.assertEqual(len(statement.args), 2)
         self.assertEqual(len(statement.body), 3)
 
@@ -94,13 +94,13 @@ class PrimaryTests(unittest.TestCase):
         scanner = Scanner("cond | 1 -> 1; end;")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Conditional))
+        self.assertIsInstance(statement, expr.Conditional)
 
     def test_cond_with_many_actions(self):
         scanner = Scanner("cond | x -> f x; 3; end;")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Conditional))
+        self.assertIsInstance(statement, expr.Conditional)
 
     def test_cond_cant_be_empty(self):
         scanner = Scanner("cond end;")
@@ -146,7 +146,7 @@ class PrimaryTests(unittest.TestCase):
         scanner = Scanner("ident : Integer + 5;")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Expression))
+        self.assertIsInstance(statement, expr.Expression)
         self.assertEqual(statement[0].name, "ident")
         self.assertEqual(len(statement[0].types), 1)
         self.assertEqual(statement[0].types[0], "Integer")
@@ -158,16 +158,16 @@ class FuncallTests(unittest.TestCase):
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
 
-        self.assertTrue(isinstance(statement, expr.Expression))
+        self.assertIsInstance(statement, expr.Expression)
         self.assertEqual(len(statement.call), 3)
 
-        self.assertTrue(isinstance(statement.call[0], expr.Identifier))
+        self.assertIsInstance(statement.call[0], expr.Identifier)
         self.assertEqual(statement.call[0].name, "call")
 
-        self.assertTrue(isinstance(statement.call[1], expr.Identifier))
+        self.assertIsInstance(statement.call[1], expr.Identifier)
         self.assertEqual(statement.call[1].name, "par1")
 
-        self.assertTrue(isinstance(statement.call[2], expr.Literal))
+        self.assertIsInstance(statement.call[2], expr.Literal)
         self.assertEqual(statement.call[2].value, 2)
 
     def test_bang_words_are_magic(self):
@@ -175,13 +175,13 @@ class FuncallTests(unittest.TestCase):
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
 
-        self.assertTrue(isinstance(statement, expr.Expression))
+        self.assertIsInstance(statement, expr.Expression)
         self.assertEqual(len(statement.call), 2)
 
-        self.assertTrue(isinstance(statement.call[0], expr.Identifier))
+        self.assertIsInstance(statement.call[0], expr.Identifier)
         self.assertEqual(statement.call[0].name, "print!")
 
-        self.assertTrue(isinstance(statement.call[1], expr.Identifier))
+        self.assertIsInstance(statement.call[1], expr.Identifier)
         self.assertEqual(statement.call[1].name, "!")
 
     def test_complete_your_function(self):
@@ -197,7 +197,7 @@ class FuncallTests(unittest.TestCase):
         self.assertEqual(len(program), 1)
 
         statement = program[0]
-        self.assertTrue(isinstance(statement, expr.Literal))
+        self.assertIsInstance(statement, expr.Literal)
         self.assertEqual(statement.value, 1)
 
 
@@ -206,31 +206,31 @@ class StatementTests(unittest.TestCase):
         scanner = Scanner('use "potato";')
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Use))
+        self.assertIsInstance(statement, expr.Use)
         self.assertEqual(statement.filename, "potato")
 
     def test_single(self):
         scanner = Scanner("let a <- 1;")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Let))
+        self.assertIsInstance(statement, expr.Let)
         self.assertEqual(len(statement.assignments), 1)
         name, value = statement.assignments[0]
-        self.assertTrue(isinstance(name, expr.Identifier))
-        self.assertTrue(isinstance(value, expr.Literal))
+        self.assertIsInstance(name, expr.Identifier)
+        self.assertIsInstance(value, expr.Literal)
 
     def test_multiple(self):
         scanner = Scanner("let a <- 1, + <- { x y | x y; };")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
-        self.assertTrue(isinstance(statement, expr.Let))
+        self.assertIsInstance(statement, expr.Let)
         self.assertEqual(len(statement.assignments), 2)
         name, value = statement.assignments[0]
-        self.assertTrue(isinstance(name, expr.Identifier))
-        self.assertTrue(isinstance(value, expr.Literal))
+        self.assertIsInstance(name, expr.Identifier)
+        self.assertIsInstance(value, expr.Literal)
         name, value = statement.assignments[1]
-        self.assertTrue(isinstance(name, expr.Identifier))
-        self.assertTrue(isinstance(value, expr.Function))
+        self.assertIsInstance(name, expr.Identifier)
+        self.assertIsInstance(value, expr.Function)
 
     def test_cant_assign_to_a_function(self):
         scanner = Scanner("let { x | x; }; <- 1;")
