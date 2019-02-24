@@ -23,6 +23,8 @@ def run_file(path):
         env = ChainMap()
         env["!"] = "!"
         env["otherwise"] = True
+        env["true"] = True
+        env["false"] = False
 
         scanner = Scanner(command)
         parser = Parser(scanner.scan_tokens())
@@ -37,6 +39,8 @@ def run_prompt():
     env = ChainMap()
     env["!"] = "!"
     env["otherwise"] = True
+    env["true"] = True
+    env["false"] = False
     while True:
         try:
             command = input("> ")
