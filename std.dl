@@ -3,7 +3,7 @@
 /* IO */
 
 let print! <- { ! s | {#print} s; };
-let read! <- { ! | {#read} !; };
+let read! <- { ! | {#read} 0; };
 
 /* Boolean. NOT short-circuited. */
 let || <- { x y |
