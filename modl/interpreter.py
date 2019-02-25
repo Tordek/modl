@@ -1,4 +1,4 @@
-import collections
+from collections import ChainMap
 from . import expr as expr
 from .parser import Parser
 from .scanner import Scanner
@@ -7,10 +7,19 @@ BUILTIN = {
     "print": lambda x: print(x),
     "add": lambda x, y: x + y,
     "sub": lambda x, y: x - y,
+    "mul": lambda x, y: x * y,
+    "fdiv": lambda x, y: x / y,
+    "mod": lambda x, y: x % y,
     "read": lambda _: input(),
     "eq": lambda x, y: x == y,
     "gt": lambda x, y: x > y,
     "if": lambda c, t, f: t if c else f,
+    "cons": lambda h, t: (h, t),
+    "head": lambda l: l[0],
+    "tail": lambda l: l[1],
+    "true": True,
+    "false": False,
+    "empty": (),
 }
 
 
@@ -24,6 +33,12 @@ class TailCall:
     def __init__(self, f, params):
         self.f = f
         self.params = params
+
+
+def get_default_env():
+    env = ChainMap()
+    env["!"] = "!"
+    return env
 
 
 def interpret(statement, environment, is_tail_call=False):

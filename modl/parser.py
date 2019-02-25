@@ -51,6 +51,15 @@ class Parser:
             right = self.symchain()
             e = expr.Symchain(e, symbol, right)
 
+        types = []
+        if self.match(TokenType.COLON):
+            t = self.consume("Expected a type after :", TokenType.TYPENAME)
+            types.append(t.lexeme)
+
+            while self.match(TokenType.RIGHT_ARROW):
+                t = self.consume("Expected a type after ->", TokenType.TYPENAME)
+                types.append(t.lexeme)
+        e.types = types
         return e
 
     def expression(self):
@@ -74,20 +83,6 @@ class Parser:
             return expr.Expression(chain)
 
     def try_primary(self):
-        value = self.try_primary_()
-        types = []
-        if self.match(TokenType.COLON):
-            t = self.consume("Expected a type after :", TokenType.TYPENAME)
-            types.append(t.lexeme)
-
-            while self.match(TokenType.RIGHT_ARROW):
-                t = self.consume("Expected a type after ->", TokenType.TYPENAME)
-                types.append(t.lexeme)
-        if value:
-            value.types = types
-        return value
-
-    def try_primary_(self):
         if self.match(TokenType.OPEN_BRACKETS):
             argument_list = []
             head_arg = self.consume(

@@ -9,21 +9,20 @@ use = USE STRING ;
 let = LET let_body (COMMA let_body)* ;
 let_body = ( IDENTIFIER | SYMBOLIC ) LEFT_ARROW symchain ;
            
-symchain = expression (SYMBOLIC symchain)* ;
+symchain = expression (SYMBOLIC symchain)* (COLON type_signature)? ;
 
 expression = primary (primary)* ;
 
 type_signature = typename (RIGHT_ARROW type_signature)* ;
 
-primary = ( function
-          | cond
-          | STRING
-          | NUMBER
-          | IDENTIFIER
-          | BUILTIN
-          | OPEN_PARENTHESES SYMBOLIC CLOSE_PARENTHESES
-          | OPEN_PARENTHESES symchain CLOSE_PARENTHESES
-          ) (COLON type_signature)?)
+primary = function
+        | cond
+        | STRING
+        | NUMBER
+        | IDENTIFIER
+        | BUILTIN
+        | OPEN_PARENTHESES SYMBOLIC CLOSE_PARENTHESES
+        | OPEN_PARENTHESES symchain CLOSE_PARENTHESES
         ;
 
 cond = COND (PIPE symchain LEFT_ARROW statement+)+ END ;

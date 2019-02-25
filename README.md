@@ -38,7 +38,7 @@ Function definition is done with:
 
 When run, both are executed in order (ideally, you're a good functional boy and that's useless; however, `!` functions exist).
 
-`!` functions are kinda special: In order to allow for zero-argument functions like `read!` (for reading input from the user), whenever the first call in an expression is a `!` function, an implicit `!` is passed:
+`!` functions are kinda special: In order to allow for zero-argument functions like `read!` (for reading input from the user), whenever the first call in an expression is a `!` function, an implicit `!` is passed, but `!` isn't valid explicitly anywhere.
 
 i.e.,
 
@@ -52,7 +52,7 @@ but
 
     map read! list;
 
-won't work because read! won't have its `!`. (I mean, it won't because of other reasons, like there not being a `map` function).
+won't work because read! won't have its `!`. You need a `map!` defined with a n `f!` argument.
 
 Scoping
 -------
@@ -76,3 +76,4 @@ TODO:
 
 - Make the interpreter able to work on partial (and multiple!) input
 - Make the scanner and parser not take the whole input in the constructor (ew, state)
+- Make `!` not be able to cross function boundaries, so it must be thread through `!` functions.

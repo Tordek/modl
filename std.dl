@@ -1,7 +1,10 @@
 /* The "Standard Library" */
+let true <- {#true};
+let false <- {#false};
+let empty <- {#empty};
+let otherwise <- true;
 
 /* IO */
-
 let print! <- { ! s | {#print} s; };
 let read! <- { ! | {#read} 0; };
 
@@ -52,3 +55,60 @@ let forever! <- { ! command! |
     command!;
     forever! command!;
 }; 
+
+/* List functions */
+let :: <- { car cdr | {#cons} car cdr; };
+let head <- { l | {#head} l; };
+let tail <- { l | {#tail} l; };
+
+let reverse_ <- { a l |
+    cond
+    | l == empty -> a;
+    | otherwise -> reverse_ (head l :: a) (tail l);
+    end;
+}, reverse <- reverse_ empty;
+
+let map <- { f l |
+    cond
+    | l == empty -> empty;
+    | otherwise -> f (head l) :: map f (tail l);
+    end;
+};
+
+let length_ <- { a l |
+    cond
+    | l == empty -> a;
+    | otherwise -> length_ (a + 1) (tail l);
+    end;
+}, length <- length_ 0;
+
+let range <- { from to |
+    cond
+    | from == to -> empty;
+    | otherwise -> from :: range (from + 1) to;
+    end;
+};
+
+let filter_ <- { a p l |
+    cond
+    | l == empty -> reverse a;
+    | p (head l) -> filter_ (head l :: a) p (tail l);
+    | otherwise -> filter_ a p (tail l);
+    end;
+}, filter <- filter_ empty;
+
+let foldl <- { f a l |
+    cond
+    | l == empty -> a;
+    | otherwise -> foldl f (f a (head l)) (tail l);
+    end;
+};
+
+/* Functional helpers */
+let =>> <- { v f | f v; };
+
+let >> <- { f g x | g (f x); };
+
+let . <- { f g x | f (g x); };
+
+let $ <- { f v | f v; };

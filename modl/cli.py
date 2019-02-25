@@ -5,7 +5,6 @@ import traceback
 from .parser import Parser
 from .scanner import Scanner
 from . import interpreter
-from collections import ChainMap
 
 
 def main(args):
@@ -20,12 +19,7 @@ def main(args):
 
 def run_file(path):
     with codecs.open(path, encoding="utf8") as script:
-        env = ChainMap()
-        env["!"] = "!"
-        env["otherwise"] = True
-        env["true"] = True
-        env["false"] = False
-
+        env = interpreter.get_default_env()
         scanner = Scanner(command)
         parser = Parser(scanner.scan_tokens())
 
@@ -36,11 +30,7 @@ def run_file(path):
 
 
 def run_prompt():
-    env = ChainMap()
-    env["!"] = "!"
-    env["otherwise"] = True
-    env["true"] = True
-    env["false"] = False
+    env = interpreter.get_default_env()
     while True:
         try:
             command = input("> ")
