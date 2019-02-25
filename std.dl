@@ -56,38 +56,35 @@ let forever! <- { ! command! |
     forever! command!;
 }; 
 
+let flip <- { f x y | f y x; };
+
 /* List functions */
 let :: <- { car cdr | {#cons} car cdr; };
 let head <- { l | {#head} l; };
 let tail <- { l | {#tail} l; };
 
-let reverse_ <- { a l |
+let foldl <- { f a l |
     cond
     | l == empty -> a;
-    | otherwise -> reverse_ (head l :: a) (tail l);
-    end;
-}, reverse <- reverse_ empty;
-
-let map <- { f l |
-    cond
-    | l == empty -> empty;
-    | otherwise -> f (head l) :: map f (tail l);
+    | otherwise -> foldl f (f a (head l)) (tail l);
     end;
 };
 
-let length_ <- { a l |
-    cond
-    | l == empty -> a;
-    | otherwise -> length_ (a + 1) (tail l);
-    end;
-}, length <- length_ 0;
+let reverse <- foldl (flip (::)) empty;
 
-let range <- { from to |
+let map_ <- { a f l |
     cond
-    | from == to -> empty;
-    | otherwise -> from :: range (from + 1) to;
+    | l == empty -> reverse a;
+    | otherwise -> map_ (f (head l) :: a) f (tail l);
     end;
-};
+}, mal <- map_ empty;
+
+let range_ <- { acc from to |
+    cond
+    | from == to -> reverse acc;
+    | otherwise -> range_ (from :: acc) (from + 1) to;
+    end;
+}, range <- range_ empty;
 
 let filter_ <- { a p l |
     cond
@@ -97,12 +94,7 @@ let filter_ <- { a p l |
     end;
 }, filter <- filter_ empty;
 
-let foldl <- { f a l |
-    cond
-    | l == empty -> a;
-    | otherwise -> foldl f (f a (head l)) (tail l);
-    end;
-};
+let length <- foldl ((+) 1) 0;
 
 /* Functional helpers */
 let =>> <- { v f | f v; };
