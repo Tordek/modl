@@ -31,7 +31,6 @@ class TestScannerTokens(unittest.TestCase):
     reserved = {
         "use": TokenType.USE,
         "let": TokenType.LET,
-        "end": TokenType.END,
         "cond": TokenType.COND,
         "<-": TokenType.LEFT_ARROW,
         "->": TokenType.RIGHT_ARROW,
