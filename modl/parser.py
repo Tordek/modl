@@ -124,11 +124,11 @@ class Parser:
                 self.consume("Missing condition delimiter", TokenType.RIGHT_ARROW)
 
                 body = [self.statement()]
-                while not self.check(TokenType.PIPE, TokenType.SEMICOLON):
+                while not self.check(TokenType.PIPE, TokenType.SEMICOLON, TokenType.COLON):
                     body.append(self.statement())
                 cases.append((condition, body))
 
-                if self.check(TokenType.SEMICOLON):
+                if not self.check(TokenType.PIPE):
                     break
 
             return expr.Conditional(cases)
