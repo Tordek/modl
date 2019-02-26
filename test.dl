@@ -6,7 +6,7 @@ let fibo <- { x |
     | x == 0 -> 1;
     | x == 1 -> 1;
     | otherwise -> fibo (x - 1) + fibo (x - 2);
-    end;
+    ;
 };
 
 /* Prettier, less deeply recursive fibonacci */
@@ -14,7 +14,7 @@ let fib <- { a b x |
   cond
   | x == 0 -> a;
   | otherwise -> fib b (a + b) (x - 1);
-  end;
+  ;
 };
 
 /* Currying is available */
@@ -23,37 +23,37 @@ let flatfibo <- fib 1 1;
 let tracefibo <- { a b x |
   cond
   | x == 0 -> print! "exiting";
-  end;
+  ;
   cond
   | x == 0 -> a;
   | otherwise ->
     print! "going deeper";
     tracefibo b (a + b) (x - 1);
-  end;
+  ;
 };
 
 /* Test for scope */
 let a <- "outer";
 let f! <- { ! |
-	let showA! <- { ! | print! a; };
-	showA!;
-	let a <- "inner";
-	showA!;
+  let showA! <- { ! | print! a; };
+  showA!;
+  let a <- "inner";
+  showA!;
 };
 
 /* Mutual recursion */
 let odd <- { x |
-        cond
-        | x == 0 -> false;
-        | otherwise -> even (x - 1);
-        end;
-    },
-    even <- { x | 
-        cond
-        | x == 0 -> true;
-        | otherwise -> odd (x - 1);
-        end;
-    };
+  cond
+  | x == 0 -> false;
+  | otherwise -> even (x - 1);
+  ;
+},
+even <- { x |
+  cond
+  | x == 0 -> true;
+  | otherwise -> odd (x - 1);
+  ;
+};
 
 /* As useful as expected, but proves TCE works. */
 let loop_forever! <- { ! | loop_forever!; };

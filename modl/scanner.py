@@ -25,7 +25,6 @@ class Scanner:
     reserved_words = {
         "use": TokenType.USE,
         "let": TokenType.LET,
-        "end": TokenType.END,
         "cond": TokenType.COND,
     }
 

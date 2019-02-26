@@ -13,21 +13,21 @@ let || <- { x y |
     cond
     | x -> true;
     | otherwise -> y;
-    end;
+    ;
 };
 
 let && <- { x y |
     cond
     | x -> y;
     | otherwise -> false;
-    end;
+    ;
 };
 
 let not <- { x |
     cond
     | x -> false;
     | otherwise -> true;
-    end;
+    ;
 };
 
 /* Arithmetics */
@@ -45,7 +45,7 @@ let >= <- { x y |
     | x == y -> true;
     | x > y -> true;
     | otherwise -> false;
-    end;
+    ;
 };
 let < <- { x y | not (x >= y); };
 let <= <- { x y | not (x > y); };
@@ -54,7 +54,7 @@ let <= <- { x y | not (x > y); };
 let forever! <- { ! command! |
     command!;
     forever! command!;
-}; 
+};
 
 let flip <- { f x y | f y x; };
 
@@ -67,7 +67,7 @@ let foldl <- { f a l |
     cond
     | l == empty -> a;
     | otherwise -> foldl f (f a (head l)) (tail l);
-    end;
+    ;
 };
 
 let reverse <- foldl (flip (::)) empty;
@@ -76,14 +76,14 @@ let map_ <- { a f l |
     cond
     | l == empty -> reverse a;
     | otherwise -> map_ (f (head l) :: a) f (tail l);
-    end;
+    ;
 }, mal <- map_ empty;
 
 let range_ <- { acc from to |
     cond
     | from == to -> reverse acc;
     | otherwise -> range_ (from :: acc) (from + 1) to;
-    end;
+    ;
 }, range <- range_ empty;
 
 let filter_ <- { a p l |
@@ -91,7 +91,7 @@ let filter_ <- { a p l |
     | l == empty -> reverse a;
     | p (head l) -> filter_ (head l :: a) p (tail l);
     | otherwise -> filter_ a p (tail l);
-    end;
+    ;
 }, filter <- filter_ empty;
 
 let length <- foldl ((+) 1) 0;

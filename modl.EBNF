@@ -8,7 +8,7 @@ stmt = use
 use = USE STRING ;
 let = LET let_body (COMMA let_body)* ;
 let_body = ( IDENTIFIER | SYMBOLIC ) LEFT_ARROW symchain ;
-           
+
 symchain = expression (SYMBOLIC symchain)* (COLON type_signature)? ;
 
 expression = primary (primary)* ;
@@ -25,6 +25,6 @@ primary = function
         | OPEN_PARENTHESES symchain CLOSE_PARENTHESES
         ;
 
-cond = COND (PIPE symchain LEFT_ARROW statement+)+ END ;
+cond = COND (PIPE symchain LEFT_ARROW statement+)+ ;
 
 function = OPEN_BRACE (BANG | identifier) identifier* PIPE statement+ CLOSE_BRACE ;

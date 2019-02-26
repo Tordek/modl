@@ -91,31 +91,31 @@ class PrimaryTests(unittest.TestCase):
             statement = parser.statement()
 
     def test_cond(self):
-        scanner = Scanner("cond | 1 -> 1; end;")
+        scanner = Scanner("cond | 1 -> 1; ;")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
         self.assertIsInstance(statement, expr.Conditional)
 
     def test_cond_with_many_actions(self):
-        scanner = Scanner("cond | x -> f x; 3; end;")
+        scanner = Scanner("cond | x -> f x; 3; ;")
         parser = Parser(scanner.scan_tokens())
         statement = parser.statement()
         self.assertIsInstance(statement, expr.Conditional)
 
     def test_cond_cant_be_empty(self):
-        scanner = Scanner("cond end;")
+        scanner = Scanner("cond ;")
         parser = Parser(scanner.scan_tokens())
         with self.assertRaises(Exception):
             statement = parser.statement()
 
     def test_cond_condition_cant_be_empty(self):
-        scanner = Scanner("cond | -> x; end;")
+        scanner = Scanner("cond | -> x; ;")
         parser = Parser(scanner.scan_tokens())
         with self.assertRaises(Exception):
             statement = parser.statement()
 
     def test_cond_action_cant_be_empty(self):
-        scanner = Scanner("cond | x -> end;")
+        scanner = Scanner("cond | x -> ;")
         parser = Parser(scanner.scan_tokens())
         with self.assertRaises(Exception):
             statement = parser.statement()
@@ -248,7 +248,7 @@ class GreenspunTest(unittest.TestCase):
     | a -> f x 1;
     | b -> print! "B";
            (+);
-    end;
+    ;
     """
     output = """USE 'std.dl'
 (DEFINE x 1

@@ -13,7 +13,6 @@ class TokenType(enum.Enum):
     OPEN_PARENTHESES = enum.auto()
     CLOSE_PARENTHESES = enum.auto()
     COND = enum.auto()
-    END = enum.auto()
 
     # Short tokens
     LEFT_ARROW = enum.auto()
