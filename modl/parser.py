@@ -124,7 +124,9 @@ class Parser:
                 self.consume("Missing condition delimiter", TokenType.RIGHT_ARROW)
 
                 body = [self.statement()]
-                while not self.check(TokenType.PIPE, TokenType.SEMICOLON, TokenType.COLON):
+                while not self.check(
+                    TokenType.PIPE, TokenType.SEMICOLON, TokenType.COLON
+                ):
                     body.append(self.statement())
                 cases.append((condition, body))
 
