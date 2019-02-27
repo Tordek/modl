@@ -40,13 +40,7 @@ let % <- { x y | {#mod} x y; };
 /* Comparisons */
 let == <- { x y | {#eq} x y; };
 let > <- { x y | {#gt} x y; };
-let >= <- { x y |
-    cond
-    | x == y -> true;
-    | x > y -> true;
-    | otherwise -> false;
-    ;
-};
+let >= <- { x y | (x == y) || (x > y); };
 let < <- { x y | not (x >= y); };
 let <= <- { x y | not (x > y); };
 
