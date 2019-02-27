@@ -77,7 +77,7 @@ let map_ <- { a f l |
     | l == empty -> reverse a;
     | otherwise -> map_ (f (head l) :: a) f (tail l);
     ;
-}, mal <- map_ empty;
+}, map <- map_ empty;
 
 let range_ <- { acc from to |
     cond
