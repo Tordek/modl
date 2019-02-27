@@ -52,7 +52,7 @@ but
 
     map read! list;
 
-won't work because read! won't have its `!`. You need a `map!` defined with a n `f!` argument.
+won't work because read! won't have its `!`. You need a `map!` defined with an `f!` argument.
 
 Scoping
 -------

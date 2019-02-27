@@ -88,14 +88,14 @@ def interpret(statement, environment, is_tail_call=False):
             value, _ = interpret(condition, environment)
             if value is True:
                 env = environment
+                for st in body[:-1]:
+                    result, env = interpret(st, env)
+
                 if is_tail_call:
-                    for st in body[:-1]:
-                        result, env = interpret(st, env)
                     return interpret(body[-1], env, True)
                 else:
-                    for st in body:
-                        result, env = interpret(st, env)
-                    return result, environment
+                    result, _ = interpret(nody[-1], env)
+                    return (result, environment)
             elif value is False:
                 continue
             else:
@@ -117,7 +117,7 @@ def do_call(f, *params):
                 return Function(
                     expr.Function(args[len(params) :], f.function.body), f_env
                 )
-            else:
+            elif len(args) == len(params):
                 v = None
                 for statement in f.function.body[:-1]:
                     (v, f_env) = interpret(statement, f_env)
@@ -128,6 +128,8 @@ def do_call(f, *params):
                     continue
                 else:
                     return result[0]
+            else:
+                raise Exception(f, "Function received too many parameters")
         elif callable(f):
             return f(*params)
         else:
